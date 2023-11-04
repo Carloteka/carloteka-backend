@@ -55,10 +55,6 @@ Items
 * [Get item](shop/categories/id_name/items/id_name/get.md) : `GET /shop/categories/<str:id_name>/items/<int:id_name>`
 * [Update items](shop/items/pk/patch.md) : `PATCH /shop/items/<int:pk>`
 
-Filters
-
-* [Get filters](shop/filters/get.md) : `GET /shop/filters`
-
 Website contacts
 
 * [Get shop contacts](shop/contacts/get.md) : `GET /shop/contacts`
