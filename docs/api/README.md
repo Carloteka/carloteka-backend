@@ -10,22 +10,14 @@ Documentation of carloteka api
 [//]: # ()
 [//]: # (* [Sign up]&#40;accounts/signup/post.md&#41; : `POST /accounts/signup/`)
 
-[//]: # (* [Log in]&#40;accounts/login/post.md&#41; : `POST /accounts/login/`)
+* [Log in](accounts/login/post.md) : `POST /accounts/login/`
 
 [//]: # (* [Sign up or Login via google]&#40;accounts/google/login/post.md&#41; : `POST /accounts/google/login/` &#40;no docs&#41;)
 
 [//]: # (* [Sign up or Login via Facebook]&#40;accounts/facebook/login/post.md&#41; : `POST /accounts/facebook/login/` &#40;no docs&#41;)
 
-[//]: # ()
-[//]: # ()
-[//]: # (* [Refresh token]&#40;accounts/token/refresh/post.md&#41; : `POST /accounts/token/refresh/` )
+* [Refresh token](accounts/token/refresh/post.md) : `POST /accounts/token/refresh/`
 
-[//]: # ()
-[//]: # ()
-[//]: # (Users)
-
-[//]: # ()
-[//]: # ()
 [//]: # (* [Get user]&#40;accounts/users/pk/get.md&#41; : `GET /accounts/users/<int:pk>`)
 
 [//]: # (* [Update user]&#40;accounts/users/pk/patch.md&#41; : `PATCH /accounts/user/<int:pk>`)
@@ -61,10 +53,10 @@ Website contacts
  
 Orders
 
-* [Get orders](shop/orders/get.md) : `GET /shop/orders`
-* [Get order](shop/orders/pk/get.md) : `GET /shop/orders/<int:pk>`
-* [Create order](shop/orders/post.md) : `POST /shop/orders`
-* [Update order](shop/orders/pk/patch.md) : `PATCH /shop/orders/<int:pk>`
+* [Get orders](shop/orders/get.md) : `GET /shop/orders` (dev)
+* [Get order](shop/orders/pk/get.md) : `GET /shop/orders/<int:pk>` (dev)
+* [Create order](shop/orders/post.md) : `POST /shop/orders` (dev)
+* [Update order](shop/orders/pk/patch.md) : `PATCH /shop/orders/<int:pk>` (dev)
 
 
 ### Nova Posta 
