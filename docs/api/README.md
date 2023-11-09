@@ -24,8 +24,7 @@ Documentation of carloteka api
 
 [//]: # (* [Delete user]&#40;accounts/users/pk/delete.md&#41; : `DELETE /accounts/user/<int:pk>`)
 
-[//]: # ()
-[//]: # ()
+
 [//]: # (* [Create user address]&#40;accounts/users/pk/adress/post.md&#41; : `POST /accounts/user/<int:pk>/adress`)
 
 [//]: # (* [Get user address]&#40;accounts/users/pk/adress/get.md&#41; : `GET /accounts/user/<int:pk>/adress`)
@@ -57,6 +56,11 @@ Orders
 * [Get order](shop/orders/pk/get.md) : `GET /shop/orders/<int:pk>` (dev)
 * [Create order](shop/orders/post.md) : `POST /shop/orders` (dev)
 * [Update order](shop/orders/pk/patch.md) : `PATCH /shop/orders/<int:pk>` (dev)
+
+Reviews
+
+* [Get items' reviews](shop/items/pk/reviews/get.md) : `GET /shop/itmes/<int:pk>/reviews` (dev)
+* [Create review](shop/reviews/post.md) : `POST /shop/reviews` (dev)
 
 
 ### Nova Posta 
