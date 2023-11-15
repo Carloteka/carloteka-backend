@@ -2,7 +2,7 @@
 
 get items details
 
-**URL** : `/shop/categories/<str:id_name>/items/<int:id_name>`
+**URL** : `/shop/categories/<str:category_id_name>/<int:item_id_name>`
 
 **Method** : `GET`
 
@@ -18,33 +18,28 @@ get items details
 ```json
 {
     "id": 1,
-    "id_name": "vakidzashi-63",
-    "name": "Вакідзаші: коротки меч самурая",
-    "price": 550,
+    "images": [
+        {
+            "image": "/images/Screenshot_from_2023-11-14_15-24-48.png"
+        },
+        {
+            "image": "/images/Screenshot_from_2023-11-14_15-26-33_H4Odwd6.png"
+        }
+    ],
+    "category__id_name": "shakhy-shashky-nardy",
+    "id_name": "chess-box",
+    "name": "Бокс для шахів",
+    "price": 1990.0,
     "discounted_price": null,
-    "length": 60,
+    "length": null,
     "height": null,
     "width": null,
     "in_stock": 1,
-    "mini_description": "Вакідзаші: коротки меч самурая",
-    "description": "Ми постаралися зробити копію японського меча Вакідзасі з дерева...",
-    "mini_image": "/media/photos/product/mini_image/photo_1_4MB4slz.png",
+    "mini_description": "Бокс для шахів",
+    "description": "Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів, Бокс для шахів",
     "visits": 0,
-    "category__id_name": "dereviana-zbroya",
-    "images": [
-      {
-        "image": "/media/photos/product/images/photo_1_m3iAxLe.png"
-      },
-      {
-        "image": "/media/photos/product/images/photo_2.png"
-      },
-      {
-        "image": "/media/photos/product/images/photo_3.png"
-      },
-      {
-        "image": "/media/photos/product/images/photo_6.png"
-      }
-    ]
+    "mini_image": "/images/Screenshot_from_2023-11-14_15-24-48_Z0wHI3f.png",
+    "category": 1
 }
 ```
 
