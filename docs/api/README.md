@@ -36,7 +36,9 @@ Documentation of carloteka api
 
 ### Shop related
 
-Endpoints for all shop logic on the website
+#### Endpoints for all shop logic on the website
+
+Categories
 
 * [Get categories](shop/categories/get.md) : `GET /shop/categories`
 
@@ -50,20 +52,27 @@ Website contacts
 
 * [Get shop contacts](shop/contacts/get.md) : `GET /shop/contacts`
  
-Orders
+[//]: # (Orders)
 
-* [Get orders](shop/orders/get.md) : `GET /shop/orders` (dev)
-* [Get order](shop/orders/pk/get.md) : `GET /shop/orders/<int:pk>` (dev)
-* [Create order](shop/orders/post.md) : `POST /shop/orders` (dev)
-* [Update order](shop/orders/pk/patch.md) : `PATCH /shop/orders/<int:pk>` (dev)
+[//]: # ()
+[//]: # (* [Get orders]&#40;shop/orders/get.md&#41; : `GET /shop/orders` &#40;dev&#41;)
 
-Reviews
+[//]: # (* [Get order]&#40;shop/orders/pk/get.md&#41; : `GET /shop/orders/<int:pk>` &#40;dev&#41;)
 
-* [Get items' reviews](shop/items/pk/reviews/get.md) : `GET /shop/itmes/<int:pk>/reviews` (dev)
-* [Create review](shop/reviews/post.md) : `POST /shop/reviews` (dev)
+[//]: # (* [Create order]&#40;shop/orders/post.md&#41; : `POST /shop/orders` &#40;dev&#41;)
+
+[//]: # (* [Update order]&#40;shop/orders/pk/patch.md&#41; : `PATCH /shop/orders/<int:pk>` &#40;dev&#41;)
+
+[//]: # ()
+[//]: # (Reviews)
+
+[//]: # ()
+[//]: # (* [Get items' reviews]&#40;shop/items/pk/reviews/get.md&#41; : `GET /shop/itmes/<int:pk>/reviews` &#40;dev&#41;)
+
+[//]: # (* [Create review]&#40;shop/reviews/post.md&#41; : `POST /shop/reviews` &#40;dev&#41;)
 
 
-### Nova Posta 
+[//]: # (### Nova Posta )
 
 
-### Payment Provider
+[//]: # (### Payment Provider)
