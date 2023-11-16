@@ -48,12 +48,12 @@ get items
             }
         ],
         "category__id_name": "shakhy-shashky-nardy",
-        "id_name": "chess-box1",
+        "id_name": "chess",
         "name": "Бокс для шахів",
-        "price": 1990.0,
-        "length": null,
-        "height": null,
-        "width": null,
+        "price": 3190.0,
+        "length": 25,
+        "height": 44,
+        "width": 21,
         "mini_description": "Бокс для шахів",
         "mini_image": "/images/Screenshot_from_2023-11-14_15-24-48_Z0wHI3f.png"
     }

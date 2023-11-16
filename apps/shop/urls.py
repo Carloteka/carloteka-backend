@@ -1,16 +1,18 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
-from .views import CategoryView, ItemView
+from .views import CategoryViewSet, ItemViewSet, ShopContactsViewSet
+
+router = DefaultRouter()
+router.register(r'items', ItemViewSet, basename='item')
+router.register(r'items', ItemViewSet, basename='item')
+router.register(r'categories', CategoryViewSet, basename='category')
+router.register('contacts', ShopContactsViewSet, basename='contacts')
 
 
 urlpatterns = [
-    path('categories',
-         CategoryView.as_view(), name='categories-view'),
-    path('items',
-         ItemView.as_view({'get': 'list'}), name='items-view'),
-    path('items/<str:pk>',
-         ItemView.as_view({'get': 'retrieve'}), name='item-view'),
-    path('categories/<str:category_id_name>/<str:item_id_name>',
-         ItemView.as_view({'get': 'retrieve_from_category'}), name='item-view'),
+    path('', include(router.urls)),
+    path('categories/<str:category_id_name>/items/<str:item_id_name>/',
+         ItemViewSet.as_view({'get': 'retrieve_by_category'}), name='item-view'),
 ]

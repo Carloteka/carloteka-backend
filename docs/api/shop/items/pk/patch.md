@@ -14,9 +14,23 @@ Get categories
 
 **Code** : `200 OK`
 
-
+one or more of follow fields
 ```json
-    // item detailed info
+{
+    "id": 1,
+    "category__id_name": "shakhy-shashky-nardy",
+    "id_name": "chess-box",
+    "name": "Бокс для шахів",
+    "price": 1990.0,
+    "discounted_price": null,
+    "length": null,
+    "height": null,
+    "width": null,
+    "in_stock": 1,
+    "mini_description": "Бокс для шахів",
+    "description": "...",
+    "category": 1
+}
 ```
 
 ## Error Responses

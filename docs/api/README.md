@@ -40,17 +40,18 @@ Documentation of carloteka api
 
 Categories
 
-* [Get categories](shop/categories/get.md) : `GET /shop/categories`
+* [Get categories](shop/categories/get.md) : `GET /shop/categories/`
 
 Items
 
-* [Get items](shop/items/get.md) : `GET /shop/items`
-* [Get item](shop/categories/id_name/items/id_name/get.md) : `GET /shop/categories/<str:id_name>/items/<int:id_name>`
-* [Update items](shop/items/pk/patch.md) : `PATCH /shop/items/<int:pk>`
+* [Get items](shop/items/get.md) : `GET /shop/items/`
+* [Get item](shop/items/pk/get.md) : `GET /shop/categories/<str:category_id_name>/items/<int:item_id_name>/`
+* [Get item](shop/categories/id_name/items/id_name/get.md) : `GET /shop/categories/<str:category_id_name>/items/<int:item_id_name>/`
+* [Update items](shop/items/pk/patch.md) : `PATCH /shop/items/<int:pk>/`
 
 Website contacts
 
-* [Get shop contacts](shop/contacts/get.md) : `GET /shop/contacts`
+* [Get shop contacts](shop/contacts/get.md) : `GET /shop/contacts/`
  
 [//]: # (Orders)
 

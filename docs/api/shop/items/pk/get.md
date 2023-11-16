@@ -2,7 +2,7 @@
 
 get items details
 
-**URL** : `/shop/categories/<str:category_id_name>/items/<int:item_id_name>/`
+**URL** : `/shop/items/<int:pk>/`
 
 **Method** : `GET`
 

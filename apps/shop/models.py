@@ -83,3 +83,15 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
     if instance.image:
         if os.path.isfile(instance.image.path):
             os.remove(instance.image.path)
+
+
+class ShopContactsModel(models.Model):
+    address_text = models.CharField(max_length=100)
+    address_googlemaps_link = models.CharField(max_length=100)
+    work_time_mo_fr = models.CharField(max_length=100)
+    work_time_sa = models.CharField(max_length=100)
+    work_time_su = models.CharField(max_length=100)
+    admin_phone = models.CharField(max_length=100)
+    email = models.CharField(max_length=100)
+    viber_link = models.CharField(max_length=100)
+    telegram_link = models.CharField(max_length=100)

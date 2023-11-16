@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CategoryModel, CategoryImageModel, ItemModel, ItemImageModel
+from .models import CategoryModel, CategoryImageModel, ItemModel, ItemImageModel, ShopContactsModel
 
 
 class CategoryImageInline(admin.TabularInline):
@@ -25,3 +25,4 @@ class ItemModelAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ItemModel, ItemModelAdmin)
+admin.site.register(ShopContactsModel)

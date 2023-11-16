@@ -2,7 +2,7 @@
 
 Get categories
 
-**URL** : `/shop/categories`
+**URL** : `/shop/categories/`
 
 **Method** : `GET`
 
@@ -31,7 +31,7 @@ Get categories
         }
     ],
   },
-    {
+  {
       "id": 1,
       "id_name": "dereviana-zbroya",
       "name": "ДЕРЕВ'ЯНА ЗБРОЯ: МЕЧІ, ШАБЛІ, КАТАНИ, ЩИТИ, НАБОРИ",
