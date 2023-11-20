@@ -3,6 +3,8 @@ from pathlib import Path
 from os import getenv
 from dotenv import load_dotenv
 
+from database_conf import make_db
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 load_dotenv()
 
@@ -79,12 +81,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+DATABASES = make_db(BASE_DIR)
 
 
 # Password validation
