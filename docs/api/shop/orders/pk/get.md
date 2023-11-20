@@ -22,7 +22,7 @@ get items
   "name": "Anton",
   "surname": "Savytskyi",
   "phone": "+380671111111",
-  "user__email": "savytskyi.work@gmail.com",
+  "email": "savytskyi.work@gmail.com",
 }
 ```
 

@@ -53,19 +53,19 @@ Website contacts
 
 * [Get shop contacts](shop/contacts/get.md) : `GET /shop/contacts/`
  
-[//]: # (Orders)
+Orders
 
 [//]: # ()
 [//]: # (* [Get orders]&#40;shop/orders/get.md&#41; : `GET /shop/orders` &#40;dev&#41;)
 
-[//]: # (* [Get order]&#40;shop/orders/pk/get.md&#41; : `GET /shop/orders/<int:pk>` &#40;dev&#41;)
+* [Get order](shop/orders/pk/get.md) : `GET /shop/orders/<int:pk>/` (dev)
 
 [//]: # (* [Create order]&#40;shop/orders/post.md&#41; : `POST /shop/orders` &#40;dev&#41;)
 
 [//]: # (* [Update order]&#40;shop/orders/pk/patch.md&#41; : `PATCH /shop/orders/<int:pk>` &#40;dev&#41;)
 
 [//]: # ()
-[//]: # (Reviews)
+Reviews
 
 [//]: # ()
 [//]: # (* [Get items' reviews]&#40;shop/items/pk/reviews/get.md&#41; : `GET /shop/itmes/<int:pk>/reviews` &#40;dev&#41;)
@@ -73,7 +73,7 @@ Website contacts
 [//]: # (* [Create review]&#40;shop/reviews/post.md&#41; : `POST /shop/reviews` &#40;dev&#41;)
 
 
-[//]: # (### Nova Posta )
+### Nova Posta 
 
 
-[//]: # (### Payment Provider)
+### Payment Provider
