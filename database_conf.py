@@ -6,7 +6,7 @@ load_dotenv()
 
 
 def make_db(BASE_DIR=None):
-    if os.getenv('DEVELOPMENT') is '1':
+    if os.getenv('DEVELOPMENT') == '1':
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.sqlite3',
@@ -14,7 +14,7 @@ def make_db(BASE_DIR=None):
             }
         }
         return DATABASES
-    elif os.getenv('PRODUCTION') is '1':
+    elif os.getenv('PRODUCTION') == '1':
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql_psycopg2',
