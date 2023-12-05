@@ -45,7 +45,7 @@ Categories
 Items
 
 * [Get items](shop/items/get.md) : `GET /shop/items/`
-* [Get item](shop/items/pk/get.md) : `GET /shop/items/<int:pk>`
+* [Get item](shop/items/pk/get.md) : `GET /shop/items/<int:pk>/`
 * [Get item](shop/categories/id_name/items/id_name/get.md) : `GET /shop/categories/<str:category_id_name>/items/<int:item_id_name>/`
 * [Update items](shop/items/pk/patch.md) : `PATCH /shop/items/<int:pk>/`
 
