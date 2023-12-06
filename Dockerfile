@@ -7,7 +7,6 @@ ENV PYTHONUNBUFFERED 1
 RUN mkdir -p /code
 
 WORKDIR /code
-RUN apt-get update
 
 COPY requirements.txt requirements.txt
 COPY .env .env
@@ -18,6 +17,7 @@ RUN set -ex && \
 COPY . /code
 RUN python manage.py collectstatic --no-input
 RUN python manage.py migrate
+RUN python manage.py generate_data 10
 
 EXPOSE 8000
 CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"]
