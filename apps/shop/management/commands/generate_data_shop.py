@@ -3,11 +3,11 @@ import datetime
 import random
 from django.core.management.base import BaseCommand
 from django.core.files import File
-from apps.shop.models import CategoryModel, CategoryImageModel, ItemModel, ShopContactsModel
+from apps.shop.models import CategoryModel, CategoryImageModel, ItemModel, ShopContactsModel, ItemImageModel
 from django.conf import settings
 
 class Command(BaseCommand):
-    help = 'Generate entries for ShopContactsModel, CategoryModel, CategoryImageModel, and ItemModel.'
+    help = 'Generate entries for ShopContactsModel, CategoryModel, CategoryImageModel, ItemModel and ItemImageModel.'
 
     def handle(self, *args, **options):
         # Adding data for ShopContactsModel
@@ -95,5 +95,12 @@ class Command(BaseCommand):
 
             item.save()
             self.stdout.write(self.style.SUCCESS(f'Item {name} created successfully with id {id_name}'))
+
+        for item in ItemModel.objects.all():
+            with open(item_image_path, 'rb') as image_file:
+                django_file = File(image_file)
+                item_image = ItemImageModel(product_model=item)
+                item_image.image.save(f'image_{item.pk}.png', django_file, save=True)
+                self.stdout.write(self.style.SUCCESS(f'Image for item {item.pk} created successfully'))
 
         self.stdout.write(self.style.SUCCESS(f'Successfully generated entries for CategoryModel, CategoryImageModel, and ItemModel'))
