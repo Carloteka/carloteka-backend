@@ -25,34 +25,34 @@ def filter_items(request, queryset):
     Size
     price
     """
-    params_filtering = {}
-    if request.query_params.get("price_from"):
-        params_filtering["price__gte"] = request.query_params.get("price_from")
-    if request.query_params.get("price_to"):
-        params_filtering["price__lte"] = request.query_params.get("price_to")
-    if request.query_params.get("state"):
-        if request.query_params.get("state") == "True":
-            params_filtering["in_stock__gt"] = 0
-        else:
-            params_filtering["in_stock"] = 0
+    params_filtering = {}  # dict of paramt for apply to querystring
+    for param, value in request.query_params.items():
+        match param, value:
+            case "price_from", _:
+                params_filtering["price__gte"] = value
+            case "price_to", _:
+                params_filtering["price__lte"] = value
 
-    if request.query_params.get("size"):
-        size = request.query_params.get("size")
-        if size == "big":
-            params_filtering["length__gt"] = 30
-            params_filtering["height__gt"] = 30
-            params_filtering["width__gt"] = 30
-        elif size == "small":
-            params_filtering["length__lt"] = 10
-            params_filtering["height__lt"] = 10
-            params_filtering["width__lt"] = 10
-        else:
-            params_filtering["length__lt"] = 30
-            params_filtering["height__lt"] = 30
-            params_filtering["width__lt"] = 30
-            params_filtering["length__gt"] = 10
-            params_filtering["height__gt"] = 10
-            params_filtering["width__gt"] = 10
+            case "state", "True":
+                params_filtering["in_stock__gt"] = 0
+            case "state", "False":
+                params_filtering["in_stock"] = 0
+
+            case "size", "big":
+                params_filtering["length__gt"] = 30
+                params_filtering["height__gt"] = 30
+                params_filtering["width__gt"] = 30
+            case "size", "small":
+                params_filtering["length__lt"] = 10
+                params_filtering["height__lt"] = 10
+                params_filtering["width__lt"] = 10
+            case "size", "medium":
+                params_filtering["length__lt"] = 30
+                params_filtering["height__lt"] = 30
+                params_filtering["width__lt"] = 30
+                params_filtering["length__gt"] = 10
+                params_filtering["height__gt"] = 10
+                params_filtering["width__gt"] = 10
 
     filtered_queryset = queryset.filter(**params_filtering)
     return filtered_queryset
