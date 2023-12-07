@@ -17,7 +17,7 @@ RUN set -ex && \
 COPY . /code
 RUN python manage.py collectstatic --no-input
 RUN python manage.py migrate
-RUN python manage.py generate_data 10
+RUN python manage.py generate_data
 
 EXPOSE 8000
 CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000"]
