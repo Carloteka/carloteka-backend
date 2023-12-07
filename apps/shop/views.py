@@ -38,22 +38,6 @@ def filter_items(request, queryset):
             case "state", "False":
                 params_filtering["in_stock"] = 0
 
-            case "size", "big":
-                params_filtering["length__gt"] = 30
-                params_filtering["height__gt"] = 30
-                params_filtering["width__gt"] = 30
-            case "size", "small":
-                params_filtering["length__lt"] = 10
-                params_filtering["height__lt"] = 10
-                params_filtering["width__lt"] = 10
-            case "size", "medium":
-                params_filtering["length__lt"] = 30
-                params_filtering["height__lt"] = 30
-                params_filtering["width__lt"] = 30
-                params_filtering["length__gt"] = 10
-                params_filtering["height__gt"] = 10
-                params_filtering["width__gt"] = 10
-
     filtered_queryset = queryset.filter(**params_filtering)
     return filtered_queryset
 
