@@ -1,5 +1,6 @@
 import os
 import datetime
+import random
 from django.core.management.base import BaseCommand
 from django.core.files import File
 from apps.shop.models import CategoryModel, CategoryImageModel, ItemModel, ShopContactsModel
@@ -11,7 +12,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Adding data for ShopContactsModel
         contact_data = {
-            'address_text': 'Вулиця приклад, 111',
+            'address_text': 'Вулиця Приклад, 111',
             'address_googlemaps_link': 'https://maps.example.com',
             'work_time_mo_fr': '9:00 - 18:00',
             'work_time_sa': '10:00 - 16:00',
@@ -25,12 +26,12 @@ class Command(BaseCommand):
         ShopContactsModel.objects.update_or_create(defaults=contact_data)
         self.stdout.write(self.style.SUCCESS('Successfully generated data for ShopContactsModel'))
 
-        # Parameters for CategoryModel, CategoryImageModel
+        # Parameters for CategoryModel and CategoryImageModel
         num_category_entries = 4
-        category_image_filename = 'img_data.png'
+        category_image_filename = 'apps/shop/management/images/img_data.png'
         category_image_path = os.path.join(settings.BASE_DIR, category_image_filename)
 
-        # Generating records for CategoryModel, CategoryImageModel
+        # Generating records for CategoryModel and CategoryImageModel
         for i in range(num_category_entries):
             timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
             unique_id_name = f"ID_{timestamp}_{i}"
@@ -45,7 +46,8 @@ class Command(BaseCommand):
 
         # Parameters for ItemModel
         num_item_entries = 100
-        item_image_filename = 'img_data.png'
+        items_per_category = num_item_entries // num_category_entries
+        item_image_filename = 'apps/shop/management/images/img_data.png'
         item_image_path = os.path.join(settings.BASE_DIR, item_image_filename)
 
         categories = CategoryModel.objects.all()
@@ -55,6 +57,9 @@ class Command(BaseCommand):
 
         # Generating records for ItemModel
         for i in range(num_item_entries):
+            category_index = i // items_per_category
+            category = categories[category_index % len(categories)]
+
             timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
             id_name = f"Ваза декоративна_{timestamp}_{i}"
             name = "Ваза"
@@ -63,11 +68,10 @@ class Command(BaseCommand):
             length = 1.5
             height = 2.0
             width = 0.5
-            in_stock = 10
+            in_stock = random.randint(0, 3)
             mini_description = "Ваза"
             description = "Ваза"
             visits = 0
-            category = categories.first() if categories else None
 
             item = ItemModel(
                 id_name=id_name,
