@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
         # Parameters for CategoryModel and CategoryImageModel
         num_category_entries = 4
-        category_image_filename = 'apps/shop/management/images/img_data.png'
+        category_image_filename = 'apps/shop/management/img/img_data.png'
         category_image_path = os.path.join(settings.BASE_DIR, category_image_filename)
 
         # Generating records for CategoryModel and CategoryImageModel
@@ -47,7 +47,7 @@ class Command(BaseCommand):
         # Parameters for ItemModel
         num_item_entries = 100
         items_per_category = num_item_entries // num_category_entries
-        item_image_filename = 'apps/shop/management/images/img_data.png'
+        item_image_filename = 'apps/shop/management/img/img_data.png'
         item_image_path = os.path.join(settings.BASE_DIR, item_image_filename)
 
         categories = CategoryModel.objects.all()
