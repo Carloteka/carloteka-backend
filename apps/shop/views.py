@@ -3,8 +3,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, NotFound
 
+from .paginators import StandardResultsSetPagination
 from .shop_serializers import CategorySerializer, ItemSerializer, ShopContactsSerializer
 from .models import CategoryModel, ItemModel, ShopContactsModel
 
@@ -16,14 +17,74 @@ class CategoryViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
 
-class ItemViewSet(viewsets.ViewSet):
+def filter_items(request, queryset):
+    """
+    Add to /items/ endpoint query parms based on filter:
+
+    State (в наявності/під замовлення)
+    Size
+    price
+    """
+    params_filtering = {}
+    if request.query_params.get("price_from"):
+        params_filtering["price__gte"] = request.query_params.get("price_from")
+    if request.query_params.get("price_to"):
+        params_filtering["price__lte"] = request.query_params.get("price_to")
+    if request.query_params.get("state"):
+        if request.query_params.get("state") == "True":
+            params_filtering["in_stock__gt"] = 0
+        else:
+            params_filtering["in_stock"] = 0
+
+    if request.query_params.get("size"):
+        size = request.query_params.get("size")
+        if size == "big":
+            params_filtering["length__gt"] = 30
+            params_filtering["height__gt"] = 30
+            params_filtering["width__gt"] = 30
+        elif size == "small":
+            params_filtering["length__lt"] = 10
+            params_filtering["height__lt"] = 10
+            params_filtering["width__lt"] = 10
+        else:
+            params_filtering["length__lt"] = 30
+            params_filtering["height__lt"] = 30
+            params_filtering["width__lt"] = 30
+            params_filtering["length__gt"] = 10
+            params_filtering["height__gt"] = 10
+            params_filtering["width__gt"] = 10
+
+    filtered_queryset = queryset.filter(**params_filtering)
+    return filtered_queryset
+
+
+class ItemViewSet(viewsets.ViewSet, StandardResultsSetPagination):
 
     def list(self, request):
-        queryset = ItemModel.objects.all()
-        serializer = ItemSerializer(queryset, many=True, fields=['id', 'id_name', 'name', 'mini_description', 'price',
-                                                              'width', 'height', 'length', 'mini_image',
-                                                              'category__id_name', 'images'])
-        return Response(serializer.data)
+        """
+         Add to /items/ endpoint query parms based on filter
+            limit and pagination
+            Category
+            State (в наявності/під замовлення)
+            Size
+        """
+        if request.query_params.get("category_id_name"):
+            try:
+                category = CategoryModel.objects.get(id_name=request.query_params.get("category_id_name"))
+            except CategoryModel.DoesNotExist:
+                raise NotFound(detail="category not found")
+            queryset = ItemModel.objects.filter(category=category)
+        else:
+            queryset = ItemModel.objects.all()
+        filtered_queryset = filter_items(request, queryset)
+        results = self.paginate_queryset(filtered_queryset, request, view=self)
+        serializer = ItemSerializer(results, many=True,
+                                    fields=['id', 'id_name', 'name', 'mini_description', 'price',
+                                            'width', 'height', 'length', 'mini_image',
+                                            'category__id_name', 'images'],
+                                    context={"request": request})
+
+        return self.get_paginated_response(serializer.data)
 
     @action(detail=True, methods=['get'], url_path='categories/(?P<category_id_name>[^/.]+)/(?P<item_id_name>[^/.]+)')
     def retrieve_by_category(self, request, category_id_name=None, item_id_name=None):
