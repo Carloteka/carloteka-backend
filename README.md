@@ -10,6 +10,35 @@ RESTful api backend for [carloteka.com](https://carloteka.com)
 
 ## Authors
 
+## Run Docker container
+
+Clone the project
+
+```bash
+  git clone git@github.com:Carloteka/carloteka-backend.git -b dev
+```
+
+Go to the project directory
+
+```bash
+  cd carloteka-backend
+```
+
+#### Activate docker
+
+Linux 
+
+```bash
+    sudo docker-compose up
+```
+
+Windows
+
+```bash
+    docker-compose up
+```
+
+Add ```--force-recreate``` to the end if you want to rebuild container
 
 ## Run Locally
 
