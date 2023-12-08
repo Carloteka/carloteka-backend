@@ -38,8 +38,9 @@ Windows
     docker-compose up
 ```
 
-Add ```--force-recreate``` to the end if you want to rebuild container
+Add ```--force-recreate``` to the end if you want to rebuild container.
 
+Open in browser  http://localhost:8000/ (especially for windows)
 ## Run Locally
 
 Clone the project
