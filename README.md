@@ -24,7 +24,7 @@ Go to the project directory
   cd carloteka-backend
 ```
 
-Activate docker
+#### Activate docker
 
 Linux 
 
@@ -38,27 +38,7 @@ Windows
     docker-compose up
 ```
 
-Activate venv (on linux)
-
-```bash
-  source venv/bing/activate
-```
-
 Add ```--force-recreate``` to the end if you want to rebuild container
-
-Install requirements
-
-```bash
-  pip install -r requirements.txt
-```
-Before starting the server check the next section "Environment Variables" right below
-
-Start the server
-
-```bash
-  python manage.py runserver
-```
-
 
 ## Run Locally
 
