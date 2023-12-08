@@ -5,6 +5,8 @@ from django.core.management.base import BaseCommand
 from django.core.files import File
 from apps.shop.models import CategoryModel, CategoryImageModel, ItemModel, ShopContactsModel, ItemImageModel
 from django.conf import settings
+from random import randint
+
 
 class Command(BaseCommand):
     help = 'Generate entries for ShopContactsModel, CategoryModel, CategoryImageModel, ItemModel and ItemImageModel.'
@@ -97,10 +99,12 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f'Item {name} created successfully with id {id_name}'))
 
         for item in ItemModel.objects.all():
-            with open(item_image_path, 'rb') as image_file:
-                django_file = File(image_file)
-                item_image = ItemImageModel(product_model=item)
-                item_image.image.save(f'image_{item.pk}.png', django_file, save=True)
-                self.stdout.write(self.style.SUCCESS(f'Image for item {item.pk} created successfully'))
+            num_images = randint(3, 7)
+            for _ in range(num_images):
+                with open(item_image_path, 'rb') as image_file:
+                    django_file = File(image_file)
+                    item_image = ItemImageModel(product_model=item)
+                    item_image.image.save(f'image_{item.pk}_{randint(1000, 9999)}.png', django_file, save=True)
+                self.stdout.write(self.style.SUCCESS(f'Created {num_images} images for item {item.pk}'))
 
         self.stdout.write(self.style.SUCCESS(f'Successfully generated entries for CategoryModel, CategoryImageModel, and ItemModel'))
