@@ -10,6 +10,55 @@ RESTful api backend for [carloteka.com](https://carloteka.com)
 
 ## Authors
 
+## Run Docker container
+
+Clone the project
+
+```bash
+  git clone git@github.com:Carloteka/carloteka-backend.git -b dev
+```
+
+Go to the project directory
+
+```bash
+  cd carloteka-backend
+```
+
+Activate docker
+
+Linux 
+
+```bash
+    sudo docker-compose up
+```
+
+Windows
+
+```bash
+    docker-compose up
+```
+
+Activate venv (on linux)
+
+```bash
+  source venv/bing/activate
+```
+
+Add ```--force-recreate``` to the end if you want to rebuild container
+
+Install requirements
+
+```bash
+  pip install -r requirements.txt
+```
+Before starting the server check the next section "Environment Variables" right below
+
+Start the server
+
+```bash
+  python manage.py runserver
+```
+
 
 ## Run Locally
 
