@@ -98,7 +98,7 @@ class ShopContactsModel(models.Model):
     telegram_link = models.CharField(max_length=100)
 
 User = get_user_model()
-class Order(models.Model):
+class OrderModel(models.Model):
     STATUS_CHOICES = [
         ('new', 'Нове замовлення'),
         ('confirmed', 'Підтверджено'),
@@ -112,25 +112,28 @@ class Order(models.Model):
         ('cod', 'Накладений платіж'),
         ('postpay', ' После оплата')
     ]
+    DELIVERY_CHOCES = [
+        ('nova_post', 'Нова пошта'),
+        ('ukr_post', 'Укрпошта')
+    ]
 
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     country = models.CharField(max_length=100)
     region = models.CharField(max_length=100)
     city = models.CharField(max_length=50)
-    delivery_service = models.CharField(max_length=100)
-    postoffice = models.CharField(max_length=50)
-    postbox = models.CharField(max_length=50)
+    delivery_service = models.CharField(max_length=100, choices=DELIVERY_CHOCES)
+    postoffice = models.CharField(max_length=50, null=True, blank=True)
+    postbox = models.CharField(max_length=50, null=True, blank=True)
     payment_method = models.CharField(max_length=50, choices=PAYMENT_CHOICES)
     phone_number = models.CharField(max_length=20)
     email = models.EmailField()
     comment = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
-    items = models.ManyToManyField('ItemModel', related_name='orders')
-    user = models.ForeignKey(User, related_name='orders', on_delete=models.SET_NULL, null=True, blank=True)
+    items = models.ManyToManyField('ItemModel', related_name='order_set')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     no_call_back = models.BooleanField(default=False, verbose_name="Не передзвонювати")
 
     def __str__(self):
-        return f'Order {self.id} by {self.first_name} {self.last_name}'
+        return f'OrderModel {self.id} by {self.first_name} {self.last_name}'
