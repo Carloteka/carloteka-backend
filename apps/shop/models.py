@@ -5,6 +5,7 @@ from io import BytesIO
 from django.core.files import File
 from django.db import models
 from django.dispatch import receiver
+from django.contrib.auth import get_user_model
 
 
 class CategoryModel(models.Model):
@@ -95,3 +96,45 @@ class ShopContactsModel(models.Model):
     email = models.CharField(max_length=100)
     viber_link = models.CharField(max_length=100)
     telegram_link = models.CharField(max_length=100)
+
+User = get_user_model()
+class OrderModel(models.Model):
+    STATUS_CHOICES = [
+        ('new', 'Нове замовлення'),
+        ('confirmed', 'Підтверджено'),
+        ('shipped', 'Відправлено'),
+        ('delivered', 'Доставлено'),
+        ('complete', 'Виконано'),
+        ('canceled', 'Скасовано'),
+    ]
+    PAYMENT_CHOICES = [
+        ('online', 'Оплата онлайн'),
+        ('cod', 'Накладений платіж'),
+        ('postpay', ' После оплата')
+    ]
+    DELIVERY_CHOCES = [
+        ('nova_post', 'Нова пошта'),
+        ('ukr_post', 'Укрпошта')
+    ]
+
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    country = models.CharField(max_length=100)
+    region = models.CharField(max_length=100)
+    city = models.CharField(max_length=50)
+    delivery_service = models.CharField(max_length=100, choices=DELIVERY_CHOCES)
+    postoffice = models.CharField(max_length=50, null=True, blank=True)
+    postbox = models.CharField(max_length=50, null=True, blank=True)
+    payment_method = models.CharField(max_length=50, choices=PAYMENT_CHOICES)
+    phone_number = models.CharField(max_length=20)
+    email = models.EmailField()
+    comment = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    update_at = models.DateTimeField(auto_now=True)
+    item_set = models.ManyToManyField('ItemModel', related_name='order_set')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    no_call_back = models.BooleanField(default=False, verbose_name="Не передзвонювати")
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f'OrderModel {self.id} by {self.first_name} {self.last_name}'
