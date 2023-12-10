@@ -2,11 +2,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from rest_framework.exceptions import APIException
 
-from .shop_serializers import CategorySerializer, ItemSerializer, ShopContactsSerializer
-from .models import CategoryModel, ItemModel, ShopContactsModel
+from .shop_serializers import CategorySerializer, ItemSerializer, ShopContactsSerializer, OrderSerializer
+from .models import CategoryModel, ItemModel, ShopContactsModel, OrderModel
 
 
 class CategoryViewSet(viewsets.ViewSet):
@@ -52,3 +52,9 @@ class ShopContactsViewSet(viewsets.ViewSet):
             raise APIException
         serializer = ShopContactsSerializer(queryset)
         return Response(serializer.data)
+
+
+class OrderViewSet(viewsets.ModelViewSet):
+    queryset = OrderModel.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAdminUser]

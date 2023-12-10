@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-
+from . import views
 from .views import CategoryViewSet, ItemViewSet, ShopContactsViewSet
 
 router = DefaultRouter()
@@ -9,6 +9,7 @@ router.register(r'items', ItemViewSet, basename='item')
 router.register(r'items', ItemViewSet, basename='item')
 router.register(r'categories', CategoryViewSet, basename='category')
 router.register('contacts', ShopContactsViewSet, basename='contacts')
+router.register(r'orders', views.OrderViewSet)
 
 
 urlpatterns = [

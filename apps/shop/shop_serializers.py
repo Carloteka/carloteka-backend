@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import CategoryModel, CategoryImageModel, ItemModel, ItemImageModel, ShopContactsModel
+from .models import CategoryModel, CategoryImageModel, ItemModel, ItemImageModel, ShopContactsModel, OrderModel
 
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
@@ -61,4 +61,9 @@ class ShopContactsSerializer(DynamicFieldsModelSerializer):
 
     class Meta:
         model = ShopContactsModel
+        fields = '__all__'
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderModel
         fields = '__all__'
