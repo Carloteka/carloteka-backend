@@ -57,4 +57,8 @@ class ShopContactsViewSet(viewsets.ViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = OrderModel.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [permissions.IsAdminUser]
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve', 'update', 'partial_update', 'destroy']:
+            return [permissions.IsAdminUser()]
+        return [permissions.AllowAny()]
