@@ -21,8 +21,10 @@ def filter_items(request, queryset):
     """
     Add to /items/ endpoint query parms based on filter:
 
-    State (в наявності/під замовлення)
-    Size
+    in_stock
+    out_of_stock
+    backorder
+    specific_order
     price
     """
     params_filtering = {}  # dict of paramt for apply to querystring
@@ -32,11 +34,26 @@ def filter_items(request, queryset):
                 params_filtering["price__gte"] = value
             case "price_to", _:
                 params_filtering["price__lte"] = value
-
-            case "state", "True":
+        # in stock
+            case "in_stock", "True":
                 params_filtering["in_stock__gt"] = 0
-            case "state", "False":
+            case "in_stock", "False":
                 params_filtering["in_stock"] = 0
+        # out of stock
+            case "out_of_stock", "True":
+                params_filtering["out_of_stock__gt"] = 0
+            case "out_of_stock", "False":
+                params_filtering["out_of_stock"] = 0
+        # backorder
+            case "backorder", "True":
+                params_filtering["backorder__gt"] = 0
+            case "backorder", "False":
+                params_filtering["backorder"] = 0
+        # specific order
+            case "specific_order", "True":
+                params_filtering["specific_order__gt"] = 0
+            case "specific_order", "False":
+                params_filtering["specific_order"] = 0
 
     filtered_queryset = queryset.filter(**params_filtering)
     return filtered_queryset
