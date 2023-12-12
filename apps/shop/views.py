@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import viewsets, permissions
 from rest_framework.exceptions import APIException
-
+from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly
 from .shop_serializers import CategorySerializer, ItemSerializer, ShopContactsSerializer, OrderSerializer
 from .models import CategoryModel, ItemModel, ShopContactsModel, OrderModel
 
@@ -59,6 +59,8 @@ class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve', 'update', 'partial_update', 'destroy']:
-            return [permissions.IsAdminUser()]
-        return [permissions.AllowAny()]
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [IsAuthenticatedOrReadOnly]
+        else:
+            permission_classes = [IsAdminUser]
+        return [permissions() for permission in permission_classes]
