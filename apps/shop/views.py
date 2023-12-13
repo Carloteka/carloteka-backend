@@ -17,48 +17,6 @@ class CategoryViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
 
-def filter_items(request, queryset):
-    """
-    Add to /items/ endpoint query parms based on filter:
-
-    in_stock
-    out_of_stock
-    backorder
-    specific_order
-    price
-    """
-    params_filtering = {}  # dict of paramt for apply to querystring
-    for param, value in request.query_params.items():
-        match param, value:
-            case "price_from", _:
-                params_filtering["price__gte"] = value
-            case "price_to", _:
-                params_filtering["price__lte"] = value
-        # in stock
-            case "in_stock", "True":
-                params_filtering["in_stock__gt"] = 0
-            case "in_stock", "False":
-                params_filtering["in_stock"] = 0
-        # out of stock
-            case "out_of_stock", "True":
-                params_filtering["out_of_stock__gt"] = 0
-            case "out_of_stock", "False":
-                params_filtering["out_of_stock"] = 0
-        # backorder
-            case "backorder", "True":
-                params_filtering["backorder__gt"] = 0
-            case "backorder", "False":
-                params_filtering["backorder"] = 0
-        # specific order
-            case "specific_order", "True":
-                params_filtering["specific_order__gt"] = 0
-            case "specific_order", "False":
-                params_filtering["specific_order"] = 0
-
-    filtered_queryset = queryset.filter(**params_filtering)
-    return filtered_queryset
-
-
 class ItemViewSet(viewsets.ViewSet, StandardResultsSetPagination):
 
     def list(self, request):
@@ -66,10 +24,20 @@ class ItemViewSet(viewsets.ViewSet, StandardResultsSetPagination):
          Add to /items/ endpoint query parms based on filter
             limit and pagination
             Category
-            State (в наявності/під замовлення)
-            Size
+            in_stock = 1
+            out_of_stock = 0
+            backorder = 2
+            specific_order = 3
         """
-        if request.query_params.get("category_id_name"):
+        category_id_name = request.query_params.get("category_id_name")
+        price_from = request.query_params.get("price_from")
+        price_to = request.query_params.get("price_to")
+        in_stock = request.query_params.get("in_stock")
+        out_of_stock = request.query_params.get("out_of_stock")
+        backorder = request.query_params.get("backorder")
+        specific_order = request.query_params.get("specific_order")
+        # filtered by category
+        if category_id_name:
             try:
                 category = CategoryModel.objects.get(id_name=request.query_params.get("category_id_name"))
             except CategoryModel.DoesNotExist:
@@ -77,10 +45,31 @@ class ItemViewSet(viewsets.ViewSet, StandardResultsSetPagination):
             queryset = ItemModel.objects.filter(category=category)
         else:
             queryset = ItemModel.objects.all()
-        filtered_queryset = filter_items(request, queryset)
-        results = self.paginate_queryset(filtered_queryset, request, view=self)
+        # filtered by price
+        if price_from:
+            queryset = queryset.filter(price__gte=price_from)
+        if price_to:
+            queryset = queryset.filter(price__lte=price_to)
+        # filtered by stock
+        add_stock = []
+        if out_of_stock:
+            if out_of_stock == "True":
+                add_stock.append(0)
+        if in_stock:
+            if in_stock == "True":
+                add_stock.append(1)
+        if backorder:
+            if backorder == "True":
+                add_stock.append(2)
+        if specific_order:
+            if specific_order == "True":
+                add_stock.append(3)
+        if add_stock:
+            queryset = queryset.filter(in_stock__in=add_stock)
+
+        results = self.paginate_queryset(queryset, request, view=self)
         serializer = ItemSerializer(results, many=True,
-                                    fields=['id', 'id_name', 'name', 'mini_description', 'price',
+                                    fields=['id', 'id_name', 'name', 'mini_description', 'price', 'in_stock',
                                             'width', 'height', 'length', 'mini_image',
                                             'category__id_name', 'images'],
                                     context={"request": request})
