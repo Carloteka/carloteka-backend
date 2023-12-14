@@ -46,7 +46,17 @@ def filter_items(request, queryset):
                 add_stock.append(3)
     if add_stock:
         queryset = queryset.filter(in_stock__in=add_stock)
-    filtered_queryset = queryset.filter(**params_filtering)
+    # Ordering
+    match request.query_params.get("sort_by"):
+        case "price_up":
+            order_by = "price"
+        case "price_down":
+            order_by = "-price"
+        case _:
+            order_by = "name"
+        # later we can add another sorting methods
+
+    filtered_queryset = queryset.filter(**params_filtering).order_by(order_by)
     return filtered_queryset
 
 
