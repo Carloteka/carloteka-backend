@@ -42,7 +42,8 @@ class ItemModel(models.Model):
     mini_description = models.TextField(max_length=2500)
     description = models.TextField(max_length=5000)
     visits = models.IntegerField(default=0)
-    category = models.ForeignKey(CategoryModel, related_name='item_set', null=True, blank=True, on_delete=models.SET_NULL)
+    category = models.ForeignKey(CategoryModel, related_name='item_set', null=True, blank=True,
+                                 on_delete=models.SET_NULL)
     mini_image = models.ImageField(upload_to='images/', null=True, blank=True)
 
     def save(self, *args, **kwargs):
@@ -97,7 +98,10 @@ class ShopContactsModel(models.Model):
     viber_link = models.CharField(max_length=100)
     telegram_link = models.CharField(max_length=100)
 
+
 User = get_user_model()
+
+
 class OrderModel(models.Model):
     STATUS_CHOICES = [
         ('new', 'Нове замовлення'),
@@ -138,3 +142,14 @@ class OrderModel(models.Model):
 
     def __str__(self):
         return f'OrderModel {self.id} by {self.first_name} {self.last_name}'
+
+
+class Review(models.Model):
+    item_set = models.ForeignKey(ItemModel, related_name='review_set', on_delete=models.CASCADE, )
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
+    text = models.TextField(blank=True, null=True)
+    date = models.DateTimeField("create", auto_now_add=True)
+    updated_at = models.DateTimeField("update", auto_now=True)
+    rate_by_stars = models.IntegerField(
+        "rate by stars", choices=[(i, i) for i in range(1, 6)], blank=True, null=True
+    )
