@@ -159,9 +159,15 @@ class OrderModel(models.Model):
 
 
 class Review(models.Model):
+    STATE_CHOCES = [
+        ('pending', 'в очікуванні'),
+        ('visible', 'видимий'),
+        ('invisible', 'невидимий')
+    ]
     item_set = models.ForeignKey(ItemModel, related_name='review_set', on_delete=models.CASCADE)
     email = models.EmailField(max_length=255)
     username = models.CharField(max_length=30)
+    state = models.CharField(choices=STATE_CHOCES, default="pending", max_length=10)
     text = models.TextField(blank=True, null=True)
     date = models.DateTimeField("create", auto_now_add=True)
     updated_at = models.DateTimeField("update", auto_now=True)
