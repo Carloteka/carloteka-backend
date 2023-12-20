@@ -1,13 +1,13 @@
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import APIException, NotFound
+from rest_framework.response import Response
 
-from .paginators import StandardResultsSetPagination
-from .shop_serializers import CategorySerializer, ItemSerializer, ShopContactsSerializer
 from .models import CategoryModel, ItemModel, ShopContactsModel
+from .paginators import StandardResultsSetPagination
+from .shop_serializers import (CategorySerializer, ItemSerializer,
+                               ReviewSerializer, ShopContactsSerializer)
 
 
 class CategoryViewSet(viewsets.ViewSet):
@@ -112,6 +112,16 @@ class ItemViewSet(viewsets.ViewSet, StandardResultsSetPagination):
     def retrieve(self, request, pk):
         item = ItemModel.objects.get(id=pk)
         serializer = ItemSerializer(item)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['get'])
+    def get_reviews(self, request, pk=None):
+        """Return all comments belonging to item with given ID."""
+        try:
+            reviews = ItemModel.objects.get(id=pk).get_reviews()
+        except (ObjectDoesNotExist, ValueError):
+            raise NotFound(detail="item not found")
+        serializer = ReviewSerializer(reviews, many=True)
         return Response(serializer.data)
 
 

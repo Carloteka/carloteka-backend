@@ -1,11 +1,12 @@
 import os
-
-from PIL import Image
 from io import BytesIO
+
+from django.contrib.auth import get_user_model
 from django.core.files import File
 from django.db import models
 from django.dispatch import receiver
-from django.contrib.auth import get_user_model
+from PIL import Image
+from rest_framework.exceptions import NotFound
 
 
 class CategoryModel(models.Model):
@@ -72,6 +73,19 @@ class ItemModel(models.Model):
 
     def __str__(self):
         return self.id_name
+
+    @classmethod
+    def get_item_by_id_name(cls, id_name):
+        try:
+            item = cls.objects.get(id_name=id_name)
+        except cls.DoesNotExist:
+            raise NotFound(detail="order not found")
+        return item
+
+    def get_reviews(self):
+        """Return all comments belonging to this item."""
+        reviews = self.review_set.all()
+        return reviews
 
 
 class ItemImageModel(models.Model):
@@ -145,11 +159,15 @@ class OrderModel(models.Model):
 
 
 class Review(models.Model):
-    item_set = models.ForeignKey(ItemModel, related_name='review_set', on_delete=models.CASCADE, )
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
+    item_set = models.ForeignKey(ItemModel, related_name='review_set', on_delete=models.CASCADE)
+    email = models.EmailField(max_length=255)
+    username = models.CharField(max_length=30)
     text = models.TextField(blank=True, null=True)
     date = models.DateTimeField("create", auto_now_add=True)
     updated_at = models.DateTimeField("update", auto_now=True)
     rate_by_stars = models.IntegerField(
         "rate by stars", choices=[(i, i) for i in range(1, 6)], blank=True, null=True
     )
+
+    def __str__(self):
+        return f'Review by {self.username} from {self.date}'

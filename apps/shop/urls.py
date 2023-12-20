@@ -6,7 +6,6 @@ from .views import CategoryViewSet, ItemViewSet, ShopContactsViewSet
 
 router = DefaultRouter()
 router.register(r'items', ItemViewSet, basename='item')
-router.register(r'items', ItemViewSet, basename='item')
 router.register(r'categories', CategoryViewSet, basename='category')
 router.register('contacts', ShopContactsViewSet, basename='contacts')
 
