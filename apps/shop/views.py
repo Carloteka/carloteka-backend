@@ -21,36 +21,36 @@ def filter_items(request, queryset):
     """
     Add to /items/ endpoint query params based on filter:
 
-    in_stock
-    out_of_stock
+    in-stock
+    out-of-stock
     backorder
-    specific_order
+    specific-order
     price
     """
     params_filtering = {}  # dict of params for apply to querystring
     add_stock: list[int] = []
     for param, value in request.query_params.items():
         match param, value:
-            case "price_from", _:
+            case "price-from", _:
                 params_filtering["price__gte"] = value
-            case "price_to", _:
+            case "price-to", _:
                 params_filtering["price__lte"] = value
             # in stock
-            case "out_of_stock", "True":
+            case "out-of-stock", "True":
                 add_stock.append(0)
-            case "in_stock", "True":
+            case "in-stock", "True":
                 add_stock.append(1)
             case "backorder", "True":
                 add_stock.append(2)
-            case "specific_order", "True":
+            case "specific-order", "True":
                 add_stock.append(3)
     if add_stock:
         queryset = queryset.filter(in_stock__in=add_stock)
     # Ordering
-    match request.query_params.get("sort_by"):
-        case "price_up":
+    match request.query_params.get("sort-by"):
+        case "price-up":
             order_by = "price"
-        case "price_down":
+        case "price-down":
             order_by = "-price"
         case _:
             order_by = "name"
@@ -72,7 +72,7 @@ class ItemViewSet(viewsets.ViewSet, StandardResultsSetPagination):
             backorder = 2
             specific_order = 3
         """
-        categories_id_list: list[str] = request.query_params.getlist("category_id_name")
+        categories_id_list: list[str] = request.query_params.getlist("category-id-name")
 
         # filtered by categories
         if categories_id_list:
@@ -94,7 +94,7 @@ class ItemViewSet(viewsets.ViewSet, StandardResultsSetPagination):
                                     fields=['id', 'id_name', 'name', 'mini_description', 'price', 'in_stock',
                                             'width', 'height', 'length', 'mini_image',
                                             'category__id_name', 'images'],
-                                    context={"request": request})
+                                    )
 
         return self.get_paginated_response(serializer.data)
 

@@ -12,23 +12,28 @@
 
 **Query Parameters**
 
-```page_size=<int>``` - how many items you get
+```page-size=<int>``` - how many items you get
 
 ```page=<int>``` - what page of database (based on page_size) you taking items from
 
-```price_from=<int>```
+```price-from=<int>```
 
-```price_to=<int>```
+```price-to=<int>```
 
-```in_stock=True```
+```in-stock=True```
 
-```out_of_stock=True```
+```out-of-stock=True```
 
 ```backorder=True```
 
-```specific_order=True```
+```specific-order=True```
 
-```category_id_name=<category_id_name>``` - can be used more than one time
+```category-id-name=<category_id_name>``` - can be used more than one time
+
+```"sort-by"=price-up``` - sort by ascending price
+
+```"sort-by"=price-down``` - sort by descending price
+
 
 ## Success Responses
 
@@ -45,10 +50,10 @@
       "id": 1,
       "images": [
         {
-          "image": "http://127.0.0.1:8000/images/image_1_3127.png"
+          "image": "/images/image_1_3127.png"
         },
         {
-          "image": "http://127.0.0.1:8000/images/image_1_7666.png"
+          "image": "/images/image_1_7666.png"
         }
       ],
       "category__id_name": "ID_20231212235019155732_0",
@@ -60,16 +65,16 @@
       "width": 0.5,
       "in_stock": 0,
       "mini_description": "Ваза",
-      "mini_image": "http://127.0.0.1:8000/images/images/mini_image_0.png"
+      "mini_image": "/images/images/mini_image_0.png"
     },
     {
       "id": 2,
       "images": [
         {
-          "image": "http://127.0.0.1:8000/images/image_2_5562.png"
+          "image": "/images/image_2_5562.png"
         },
         {
-          "image": "http://127.0.0.1:8000/images/image_2_6356.png"
+          "image": "/images/image_2_6356.png"
         }
       ],
       "category__id_name": "ID_20231212235019155732_0",
@@ -81,7 +86,7 @@
       "width": 0.5,
       "in_stock": 3,
       "mini_description": "Ваза",
-      "mini_image": "http://127.0.0.1:8000/images/images/mini_image_1.png"
+      "mini_image": "/images/images/mini_image_1.png"
     }
   ]
 }
