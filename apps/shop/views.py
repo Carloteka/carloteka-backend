@@ -115,7 +115,7 @@ class ItemViewSet(viewsets.ViewSet, StandardResultsSetPagination):
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'])
-    def get_reviews(self, request, pk=None):
+    def reviews(self, request, pk=None):
         """Return all comments belonging to item with given ID."""
         try:
             reviews = ItemModel.objects.get(id=pk).get_reviews()
