@@ -74,13 +74,6 @@ class ItemModel(models.Model):
     def __str__(self):
         return self.id_name
 
-    @classmethod
-    def get_item_by_id_name(cls, id_name):
-        try:
-            item = cls.objects.get(id_name=id_name)
-        except cls.DoesNotExist:
-            raise NotFound(detail="order not found")
-        return item
 
     def get_reviews(self):
         """Return all comments belonging to this item."""
@@ -160,13 +153,14 @@ class OrderModel(models.Model):
 
 class Review(models.Model):
     STATE_CHOCES = [
-        ('pending', 'в очікуванні'),
-        ('visible', 'видимий'),
-        ('invisible', 'невидимий')
+        ("pending", "в очікуванні"),
+        ("visible", "видимий"),
+        ("invisible", "невидимий")
     ]
     item_set = models.ForeignKey(ItemModel, related_name='review_set', on_delete=models.CASCADE)
     email = models.EmailField(max_length=255)
-    username = models.CharField(max_length=30)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
     state = models.CharField(choices=STATE_CHOCES, default="pending", max_length=10)
     text = models.TextField(blank=True, null=True)
     date = models.DateTimeField("create", auto_now_add=True)
@@ -176,4 +170,4 @@ class Review(models.Model):
     )
 
     def __str__(self):
-        return f'Review by {self.username} from {self.date}'
+        return f"Review ID: {self.id} by {self.first_name} {self.last_name}"

@@ -31,7 +31,7 @@ admin.site.register(OrderModel)
 
 @admin.register(Review)
 class ReviewModelAdmin(admin.ModelAdmin):
-    list_display = ['email', 'username', 'text', "rate_by_stars", "state", "date", "updated_at"]
+    list_display = ["id", "email", "first_name", "last_name", "text", "rate_by_stars", "state", "date", "updated_at"]
     model = Review
 
 

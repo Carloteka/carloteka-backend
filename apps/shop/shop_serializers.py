@@ -67,4 +67,4 @@ class ShopContactsSerializer(DynamicFieldsModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ['item_set', "email", "username", "text", "state", "rate_by_stars", "date"]
+        fields = ["id", "item_set", "email", "first_name", "last_name", "text", "state", "rate_by_stars", "date"]
