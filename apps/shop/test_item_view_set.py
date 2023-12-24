@@ -37,10 +37,10 @@ class TestReview:
     @pytest.mark.django_db
     def test_item_review_get(self, initialize_task_db):
         item1 = initialize_task_db["item1"]
-
+        url = reverse("item-reviews", kwargs={"pk": item1.id})
         # test that in item1 no reviews
         client = APIClient()
-        response = client.get(reverse("review-list", kwargs={"pk": item1.id}))
+        response = client.get(url)
         assert (
                 response.status_code == status.HTTP_200_OK
         ), f"error, status: {response.status_code}"
@@ -50,7 +50,7 @@ class TestReview:
         new_review = item1.review_set.create(email="test@test.test", first_name="test", last_name="test")
 
         # test that in item1 there is one review
-        response = client.get(reverse("review-list", kwargs={"pk": item1.id}))
+        response = client.get(url)
         assert (
                 response.status_code == status.HTTP_200_OK
         ), f"error, status: {response.status_code}"

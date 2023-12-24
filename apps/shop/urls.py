@@ -11,8 +11,6 @@ router.register('contacts', ShopContactsViewSet, basename='contacts')
 
 
 urlpatterns = [
-    path('items/<int:pk>/reviews/',
-         ItemViewSet.as_view({'get': 'reviews'}), name='review-list'),
     path('', include(router.urls)),
     path('categories/<str:category_id_name>/items/<str:item_id_name>/',
          ItemViewSet.as_view({'get': 'retrieve_by_category'}), name='item-view'),
