@@ -4,10 +4,11 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import APIException, NotFound
 from rest_framework.response import Response
 
-from .models import CategoryModel, ItemModel, ShopContactsModel
+from .models import CategoryModel, ItemModel, ShopContactsModel, Review
 from .paginators import StandardResultsSetPagination
 from .shop_serializers import (CategorySerializer, ItemSerializer,
                                ReviewSerializer, ShopContactsSerializer)
+from rest_framework.permissions import IsAdminUser
 
 
 class CategoryViewSet(viewsets.ViewSet):
@@ -135,3 +136,11 @@ class ShopContactsViewSet(viewsets.ViewSet):
             raise APIException
         serializer = ShopContactsSerializer(queryset)
         return Response(serializer.data)
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    """CRUD viewsets for Review model."""
+
+    serializer_class = ReviewSerializer
+    queryset = Review.objects.all()
+    permission_classes = [IsAdminUser]
