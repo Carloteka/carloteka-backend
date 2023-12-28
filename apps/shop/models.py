@@ -43,7 +43,7 @@ class ItemModel(models.Model):
     description = models.TextField(max_length=5000)
     visits = models.IntegerField(default=0)
     category = models.ForeignKey(CategoryModel, related_name='item_set', null=True, blank=True, on_delete=models.SET_NULL)
-    mini_image = models.ImageField(upload_to='images', null=True, blank=True)
+    mini_image = models.ImageField(upload_to='images/', null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # Open the uploaded image
