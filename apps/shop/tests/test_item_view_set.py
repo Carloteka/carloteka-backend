@@ -39,13 +39,13 @@ class TestReview:
     @pytest.mark.django_db
     def test_item_review_get(self, initialize_task_db):
         item1 = initialize_task_db["item1"]
-        url = reverse("item-reviews", kwargs={"pk": item1.id})
+        url = reverse("reviews-by-item", kwargs={"item_id": item1.id})
 
         # test that in item1 no reviews
         client = APIClient()
         response = client.get(url)
         assert (
-            response.status_code == status.HTTP_200_OK
+                response.status_code == status.HTTP_200_OK
         ), f"error, status: {response.status_code}"
         assert response.data == []
 
@@ -57,8 +57,27 @@ class TestReview:
         # test that in item1 there is one review
         response = client.get(url)
         assert (
-            response.status_code == status.HTTP_200_OK
+                response.status_code == status.HTTP_200_OK
         ), f"error, status: {response.status_code}"
         assert response.data != []
         assert response.data[0]["id"] == new_review.id
         assert len(response.data) == 1
+
+    @pytest.mark.django_db
+    def test_add_review_to_item(self, initialize_task_db):
+        item1 = initialize_task_db["item1"]
+        url = reverse("reviews-by-item", kwargs={"item_id": item1.id})
+        client = APIClient()
+        response = client.post(url, data={
+            "email": "email@email.email",
+            "first_name": "first_name",
+            "last_name": "last_name",
+            "text": "text",
+            "state": "pending",
+            "rate_by_stars": 2
+        })
+        assert (
+                response.status_code == status.HTTP_201_CREATED
+        ), f"error, status: {response.status_code}"
+
+        assert item1.review_set.count() == 1
