@@ -50,18 +50,18 @@ class ItemModel(models.Model):
         img = Image.open(self.mini_image)
 
         # If the image has an alpha channel, convert it to RGB
-        if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
-            rgb_img = img.convert('RGB')
-        else:
-            rgb_img = img
+        # if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+        #     rgb_img = img.convert('RGB')
+        # else:
+        #     rgb_img = img
 
         # Resize it to 512x512 or smaller, keeping aspect ratio
         max_size = (512, 512)
-        rgb_img.thumbnail(max_size, Image.LANCZOS)
+        img.thumbnail(max_size, Image.LANCZOS)
 
         # Save the image back to memory
         temp_thumb = BytesIO()
-        rgb_img.save(temp_thumb, format='JPEG')
+        img.save(temp_thumb, format='PNG')
         temp_thumb.seek(0)
 
         # Save image field
