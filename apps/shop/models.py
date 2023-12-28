@@ -79,11 +79,18 @@ class ItemImageModel(models.Model):
                                       null=True, blank=True, default=None)
 
 
-@receiver(models.signals.post_delete, sender=ItemModel)
+@receiver(models.signals.post_delete, sender=ItemImageModel)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
     if instance.image:
         if os.path.isfile(instance.image.path):
             os.remove(instance.image.path)
+
+
+@receiver(models.signals.post_delete, sender=ItemModel)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    if instance.mini_image:
+        if os.path.isfile(instance.mini_image.path):
+            os.remove(instance.mini_image.path)
 
 
 class ShopContactsModel(models.Model):
