@@ -106,6 +106,20 @@ export DB_USER = dbusername
 export DB_PASSWORD = Password
 
 ```
+
+
+## Run Tests
+Go to the project directory
+
+```bash
+  cd carloteka-backend
+```
+Run tests:
+
+```bash
+  pytest
+```
+
 ## Documentation
 
 [API docs](/docs/api/README.md)

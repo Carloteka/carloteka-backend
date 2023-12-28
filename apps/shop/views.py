@@ -1,13 +1,13 @@
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import viewsets
 from rest_framework.exceptions import APIException, NotFound
+from rest_framework.response import Response
 
+from .models import CategoryModel, ItemModel, ShopContactsModel, Review
 from .paginators import StandardResultsSetPagination
-from .shop_serializers import CategorySerializer, ItemSerializer, ShopContactsSerializer
-from .models import CategoryModel, ItemModel, ShopContactsModel
+from .shop_serializers import (CategorySerializer, ItemSerializer,
+                               ReviewSerializer, ShopContactsSerializer)
 
 
 class CategoryViewSet(viewsets.ViewSet):
@@ -98,17 +98,6 @@ class ItemViewSet(viewsets.ViewSet, StandardResultsSetPagination):
 
         return self.get_paginated_response(serializer.data)
 
-    @action(detail=True, methods=['get'], url_path='categories/(?P<category_id_name>[^/.]+)/(?P<item_id_name>[^/.]+)')
-    def retrieve_by_category(self, request, category_id_name=None, item_id_name=None):
-        try:
-            item = CategoryModel.objects.get(id_name=category_id_name).item_set.get(id_name=item_id_name)
-        except ObjectDoesNotExist:
-            APIException.status_code = 404
-            APIException.default_detail = 'Object Not found'
-            raise APIException
-        serializer = ItemSerializer(item)
-        return Response(serializer.data)
-
     def retrieve(self, request, pk):
         item = ItemModel.objects.get(id=pk)
         serializer = ItemSerializer(item)
@@ -125,3 +114,37 @@ class ShopContactsViewSet(viewsets.ViewSet):
             raise APIException
         serializer = ShopContactsSerializer(queryset)
         return Response(serializer.data)
+
+
+class ReviewViewSet(viewsets.ViewSet):
+
+    def reviews_by_item(self, request, item_id=None):
+        """Return all comments belonging to item with given ID."""
+        try:
+            reviews = ItemModel.objects.get(id=item_id).get_reviews()
+        except (ObjectDoesNotExist, ValueError):
+            raise NotFound(detail="item not found")
+        serializer = ReviewSerializer(reviews, many=True)
+        return Response(serializer.data)
+
+    def add_review_by_item(self, request, item_id=None):
+        """Add a comment for item with given ID.
+        example body in POST request:
+        {
+            "email": "email@email.email",
+            "first_name": "first_name",
+            "last_name": "last_name",
+            "text": "text",
+            "state": "pending",
+            "rate_by_stars": 2
+        }
+        """
+        try:
+            item = ItemModel.objects.get(id=item_id)
+        except (ObjectDoesNotExist, ValueError):
+            raise NotFound(detail="item not found")
+        serializer = ReviewSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(item_set=item)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
