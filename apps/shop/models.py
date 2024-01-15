@@ -1,11 +1,12 @@
 import os
-
-from PIL import Image
 from io import BytesIO
+
+from django.contrib.auth import get_user_model
 from django.core.files import File
 from django.db import models
 from django.dispatch import receiver
-from django.contrib.auth import get_user_model
+from PIL import Image
+from rest_framework.exceptions import NotFound
 
 
 class CategoryModel(models.Model):
@@ -42,7 +43,8 @@ class ItemModel(models.Model):
     mini_description = models.TextField(max_length=2500)
     description = models.TextField(max_length=5000)
     visits = models.IntegerField(default=0)
-    category = models.ForeignKey(CategoryModel, related_name='item_set', null=True, blank=True, on_delete=models.SET_NULL)
+    category = models.ForeignKey(CategoryModel, related_name='item_set', null=True, blank=True,
+                                 on_delete=models.SET_NULL)
     mini_image = models.ImageField(upload_to='images/', null=True, blank=True)
 
     def save(self, *args, **kwargs):
@@ -71,6 +73,12 @@ class ItemModel(models.Model):
 
     def __str__(self):
         return self.id_name
+
+
+    def get_reviews(self):
+        """Return all comments belonging to this item."""
+        reviews = self.review_set.all()
+        return reviews
 
 
 class ItemImageModel(models.Model):
@@ -104,7 +112,10 @@ class ShopContactsModel(models.Model):
     viber_link = models.CharField(max_length=100)
     telegram_link = models.CharField(max_length=100)
 
+
 User = get_user_model()
+
+
 class OrderModel(models.Model):
     STATUS_CHOICES = [
         ('new', 'Нове замовлення'),
@@ -145,3 +156,25 @@ class OrderModel(models.Model):
 
     def __str__(self):
         return f'OrderModel {self.id} by {self.first_name} {self.last_name}'
+
+
+class Review(models.Model):
+    STATE_CHOCES = [
+        ("pending", "в очікуванні"),
+        ("visible", "видимий"),
+        ("invisible", "невидимий")
+    ]
+    item_set = models.ForeignKey(ItemModel, related_name='review_set', on_delete=models.CASCADE)
+    email = models.EmailField(max_length=255)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    state = models.CharField(choices=STATE_CHOCES, default="pending", max_length=10)
+    text = models.TextField(blank=True, null=True)
+    date = models.DateTimeField("create", auto_now_add=True)
+    updated_at = models.DateTimeField("update", auto_now=True)
+    rate_by_stars = models.IntegerField(
+        "rate by stars", choices=[(i, i) for i in range(1, 6)], blank=True, null=True
+    )
+
+    def __str__(self):
+        return f"Review ID: {self.id} by {self.first_name} {self.last_name}"
