@@ -1,0 +1,128 @@
+openapi: 3.0.3
+info:
+  title: Carloteka Api
+  version: 1.0.0
+  description: Api for carloteka.com
+paths:
+  /api/shop/categories/:
+    get:
+      operationId: shop_categories_retrieve
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/shop/categories/{category_id_name}/items/{item_id_name}/:
+    get:
+      operationId: shop_categories_items_retrieve
+      parameters:
+      - in: path
+        name: category_id_name
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: item_id_name
+        schema:
+          type: string
+        required: true
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/shop/contacts/:
+    get:
+      operationId: shop_contacts_retrieve
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/shop/items/:
+    get:
+      operationId: shop_items_retrieve
+      description: |-
+        Add to /items/ endpoint query parms based on filter
+           limit and pagination
+           Category
+           in_stock = 1
+           out_of_stock = 0
+           backorder = 2
+           specific_order = 3
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/shop/items/{id}/:
+    get:
+      operationId: shop_items_retrieve_2
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/shop/items/{id}/categories/{category_id_name}/{item_id_name}/:
+    get:
+      operationId: shop_items_categories_retrieve
+      parameters:
+      - in: path
+        name: category_id_name
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: item_id_name
+        schema:
+          type: string
+        required: true
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
