@@ -1,0 +1,167 @@
+openapi: 3.0.3
+info:
+  title: carloteka.com api
+  version: 1.0.0
+  description: carloteka.com api
+paths:
+  /api/shop/categories/:
+    get:
+      operationId: shop_categories_retrieve
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/shop.CategoryListOutput'
+          description: ''
+  /api/shop/contacts/:
+    get:
+      operationId: shop_contacts_retrieve
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+                description: Unspecified response body
+          description: ''
+  /api/shop/items/:
+    get:
+      operationId: shop_items_retrieve
+      description: |-
+        Add to /items/ endpoint query parms based on filter
+           limit and pagination
+           Category
+           in_stock = 1
+           out_of_stock = 0
+           backorder = 2
+           specific_order = 3
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/shop/items/{id}/:
+    get:
+      operationId: shop_items_retrieve_2
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/shop/reviews/item/{item_id}/:
+    get:
+      operationId: shop_reviews_item_retrieve
+      description: Return all comments belonging to item with given ID.
+      parameters:
+      - in: path
+        name: item_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: shop_reviews_item_create
+      description: |-
+        Add a comment for item with given ID.
+        example body in POST request:
+        {
+            "email": "email@email.email",
+            "first_name": "first_name",
+            "last_name": "last_name",
+            "text": "text",
+            "state": "pending",
+            "rate_by_stars": 2
+        }
+      parameters:
+      - in: path
+        name: item_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - shop
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    CategoryImage:
+      type: object
+      properties:
+        image:
+          type: string
+          format: uri
+          nullable: true
+    shop.CategoryListOutput:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryImage'
+        id_name:
+          type: string
+          maxLength: 50
+        name:
+          type: string
+          maxLength: 128
+        description:
+          type: string
+          maxLength: 5000
+      required:
+      - description
+      - id
+      - id_name
+      - images
+      - name
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
