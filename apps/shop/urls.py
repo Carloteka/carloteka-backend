@@ -4,7 +4,6 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     ItemViewSet,
-    ShopContactsViewSet,
     ReviewViewSet
 )
 from .apis import (
@@ -14,8 +13,6 @@ from .apis import (
 
 router = DefaultRouter()
 router.register(r'items', ItemViewSet, basename='item')
-# router.register(r'categories', CategoryViewSet, basename='category')
-# router.register('contacts', ShopContactsViewSet, basename='contacts')
 
 categories_urlpatterns = [
     path('', CategoryListApi.as_view(), name='list'),

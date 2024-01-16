@@ -97,18 +97,6 @@ class ItemViewSet(viewsets.ViewSet, StandardResultsSetPagination):
         return Response(serializer.data)
 
 
-class ShopContactsViewSet(viewsets.ViewSet):
-    def list(self, request):
-        try:
-            queryset = ShopContactsModel.objects.all().first()
-        except ObjectDoesNotExist:
-            APIException.status_code = 404
-            APIException.default_detail = 'Object Not found'
-            raise APIException
-        serializer = ShopContactsSerializer(queryset)
-        return Response(serializer.data)
-
-
 class ReviewViewSet(viewsets.ViewSet):
 
     def reviews_by_item(self, request, item_id=None):
