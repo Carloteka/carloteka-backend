@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import CategoryModel, CategoryImageModel, ItemModel, ItemImageModel, ShopContactsModel, Review
+from .models import CategoryModel, CategoryImageModel, ItemModel, ItemImageModel, ShopContactsModel, ReviewModel
 
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
@@ -64,5 +64,5 @@ class ShopContactsSerializer(DynamicFieldsModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Review
+        model = ReviewModel
         fields = ["id", "email", "first_name", "last_name", "text", "state", "rate_by_stars", "date"]

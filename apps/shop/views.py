@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import APIException, NotFound
 from rest_framework.response import Response
 
-from .models import CategoryModel, ItemModel, ShopContactsModel, Review
+from .models import CategoryModel, ItemModel, ShopContactsModel, ReviewModel
 from .paginators import StandardResultsSetPagination
 from .serializers import (CategorySerializer, ItemSerializer,
                           ReviewSerializer, ShopContactsSerializer)

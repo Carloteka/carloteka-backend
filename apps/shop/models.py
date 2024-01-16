@@ -158,7 +158,7 @@ class OrderModel(models.Model):
         return f'OrderModel {self.id} by {self.first_name} {self.last_name}'
 
 
-class Review(models.Model):
+class ReviewModel(models.Model):
     STATE_CHOCES = [
         ("pending", "в очікуванні"),
         ("visible", "видимий"),

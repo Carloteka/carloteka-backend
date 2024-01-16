@@ -1,6 +1,10 @@
 from .models import (
     CategoryModel,
-    ShopContactsModel
+    ShopContactsModel,
+    ItemModel,
+    ItemImageModel,
+    OrderModel,
+    ReviewModel
 )
 
 
@@ -13,4 +17,10 @@ class CategorySelector:
 class ShopContactsSelector:
     def shop_contacts_retrieve_no_pk(self):
         queryset = ShopContactsModel.objects.first()
+        return queryset
+
+
+class ItemSelector:
+    def item_list(self, params=None):
+        queryset = ItemModel.objects.all()
         return queryset
