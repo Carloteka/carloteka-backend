@@ -25,8 +25,6 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 
 
 class CategoryImageSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField
-
     class Meta:
         model = CategoryImageModel
         fields = ['image']
@@ -68,6 +66,3 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ["id", "email", "first_name", "last_name", "text", "state", "rate_by_stars", "date"]
-
-
-

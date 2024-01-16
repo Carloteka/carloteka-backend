@@ -6,15 +6,8 @@ from rest_framework.response import Response
 
 from .models import CategoryModel, ItemModel, ShopContactsModel, Review
 from .paginators import StandardResultsSetPagination
-from .shop_serializers import (CategorySerializer, ItemSerializer,
-                               ReviewSerializer, ShopContactsSerializer)
-
-
-class CategoryViewSet(viewsets.ViewSet):
-    def list(self, request):
-        categories = CategoryModel.objects.all()
-        serializer = CategorySerializer(categories, many=True)
-        return Response(serializer.data)
+from .serializers import (CategorySerializer, ItemSerializer,
+                          ReviewSerializer, ShopContactsSerializer)
 
 
 def filter_items(request, queryset):
