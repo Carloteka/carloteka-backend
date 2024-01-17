@@ -21,6 +21,9 @@ from .serializers import (
     CategoryImageSerializer,
     ItemImageSerializer,
 )
+from .pagination import (
+    get_paginated_response, LimitOffsetPagination
+)
 
 
 class CategoryListApi(APIView, CategorySelector):
@@ -58,6 +61,9 @@ class ShopContactsRetrieveApi(APIView, ShopContactsSelector):
 
 
 class ItemListApi(APIView, ItemSelector):
+    class Pagination(LimitOffsetPagination):
+        default_limit = 1
+
     class FilterSerializer(serializers.Serializer):
         in_stock = serializers.ListField(
             child=serializers.IntegerField(),
@@ -85,20 +91,6 @@ class ItemListApi(APIView, ItemSelector):
     @extend_schema(
         responses={200: OutputSerializer()},
         parameters=[
-            OpenApiParameter(
-                name='page_size',
-                location=OpenApiParameter.QUERY,
-                description='page size',
-                required=False,
-                type=int
-            ),
-            OpenApiParameter(
-                name='page',
-                location=OpenApiParameter.QUERY,
-                description='page number',
-                required=False,
-                type=int
-            ),
             OpenApiParameter(
                 name='category__id_name',
                 location=OpenApiParameter.QUERY,
@@ -139,6 +131,20 @@ class ItemListApi(APIView, ItemSelector):
                 type=str,
                 enum=('price', '-price')
             ),
+            OpenApiParameter(
+                name='limit',
+                location=OpenApiParameter.QUERY,
+                description='how many objects you get',
+                required=False,
+                type=int
+            ),
+            OpenApiParameter(
+                name='offset',
+                location=OpenApiParameter.QUERY,
+                description='page of objects',
+                required=False,
+                type=int
+            ),
         ],
     )
     def get(self, request):
@@ -147,6 +153,10 @@ class ItemListApi(APIView, ItemSelector):
         print(filters_serializer.validated_data)
         items = self.item_list(filters=filters_serializer.validated_data)
 
-        data = self.OutputSerializer(items, many=True).data
-
-        return Response(data=data, status=status.HTTP_200_OK)  # TODO remove 'results' while adding filters
+        return get_paginated_response(
+            pagination_class=self.Pagination,
+            serializer_class=self.OutputSerializer,
+            queryset=items,
+            request=request,
+            view=self
+        )
