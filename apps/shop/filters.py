@@ -4,7 +4,7 @@ from .models import ItemModel
 
 
 class ItemFilter(django_filters.FilterSet):
-    in_stock = django_filters.AllValuesMultipleFilter()
+    stock = django_filters.AllValuesMultipleFilter()
     price = django_filters.RangeFilter()
     order_by = django_filters.OrderingFilter(
         # tuple mapping, ('model field name', 'parameter name')
@@ -16,4 +16,4 @@ class ItemFilter(django_filters.FilterSet):
 
     class Meta:
         model = ItemModel
-        fields = ('in_stock', 'price', 'category__id_name')
+        fields = ('stock', 'price', 'category__id_name')

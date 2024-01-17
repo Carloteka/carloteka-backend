@@ -32,6 +32,12 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
 
 
 class ItemModel(models.Model):
+    STOCK_STATUS_CHOCES = [
+        ('IN_STOCK', 'В наявносі'),
+        ('OUT_OF_STOCK', 'Немає в наявності'),
+        ('BACKORDER', 'Очікується'),
+        ('SPECIFIC_ORDER', 'Під замовлення'),
+    ]
     id_name = models.CharField(max_length=30, unique=True)
     name = models.CharField(max_length=128)
     price = models.FloatField()
@@ -39,7 +45,11 @@ class ItemModel(models.Model):
     length = models.FloatField(default=None, null=True, blank=True)
     height = models.FloatField(default=None, null=True, blank=True)
     width = models.FloatField(default=None, null=True, blank=True)
-    in_stock = models.IntegerField(default=1)
+    stock = models.CharField(
+        max_length=40,
+        choices=STOCK_STATUS_CHOCES,
+        default='IN_STOCK'
+    )
     mini_description = models.TextField(max_length=2500)
     description = models.TextField(max_length=5000)
     visits = models.IntegerField(default=0)

@@ -1,3 +1,4 @@
+from drf_spectacular.types import OpenApiTypes
 from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -65,8 +66,8 @@ class ItemListApi(APIView, ItemSelector):
         default_limit = 1
 
     class FilterSerializer(serializers.Serializer):
-        in_stock = serializers.ListField(
-            child=serializers.IntegerField(),
+        stock = serializers.ListField(
+            child=serializers.CharField(),
             required=False
         )
         price_max = serializers.IntegerField(required=False)
@@ -100,12 +101,13 @@ class ItemListApi(APIView, ItemSelector):
                 many=True
             ),
             OpenApiParameter(
-                name='in_stock',
+                name='stock',
                 location=OpenApiParameter.QUERY,
-                description='stock state of item',
+                description='stock state of item (you can select more then one by holding control button',
                 required=False,
-                type=int,
-                many=True
+                type=str,
+                many=True,
+                enum=('IN_STOCK', 'OUT_OF_STOCK', 'BACKORDER', 'SPECIFIC_ORDER')
             ),
             OpenApiParameter(
                 name='price_min',
