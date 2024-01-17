@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CategoryModel, CategoryImageModel, ItemModel, ItemImageModel, ShopContactsModel, OrderModel, Review
+from .models import CategoryModel, CategoryImageModel, ItemModel, ItemImageModel, ShopContactsModel, OrderModel, ReviewModel
 
 
 class CategoryImageInline(admin.TabularInline):
@@ -29,9 +29,9 @@ admin.site.register(ShopContactsModel)
 admin.site.register(OrderModel)
 
 
-@admin.register(Review)
+@admin.register(ReviewModel)
 class ReviewModelAdmin(admin.ModelAdmin):
     list_display = ["id", "email", "first_name", "last_name", "text", "rate_by_stars", "state", "date", "updated_at"]
-    model = Review
+    model = ReviewModel
 
 

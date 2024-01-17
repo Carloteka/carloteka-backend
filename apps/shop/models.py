@@ -32,17 +32,26 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
 
 
 class ItemModel(models.Model):
-    id_name = models.CharField(max_length=30, unique=True)
+    STOCK_STATUS_CHOCES = [
+        ('IN_STOCK', 'В наявносі'),
+        ('OUT_OF_STOCK', 'Немає в наявності'),
+        ('BACKORDER', 'Очікується'),
+        ('SPECIFIC_ORDER', 'Під замовлення'),
+    ]
+    id_name = models.CharField(max_length=128, unique=True)
     name = models.CharField(max_length=128)
     price = models.FloatField()
     discounted_price = models.FloatField(default=None, null=True, blank=True)
     length = models.FloatField(default=None, null=True, blank=True)
     height = models.FloatField(default=None, null=True, blank=True)
     width = models.FloatField(default=None, null=True, blank=True)
-    in_stock = models.IntegerField(default=1)
+    stock = models.CharField(
+        max_length=40,
+        choices=STOCK_STATUS_CHOCES,
+        default='IN_STOCK'
+    )
     mini_description = models.TextField(max_length=2500)
     description = models.TextField(max_length=5000)
-    visits = models.IntegerField(default=0)
     category = models.ForeignKey(CategoryModel, related_name='item_set', null=True, blank=True,
                                  on_delete=models.SET_NULL)
     mini_image = models.ImageField(upload_to='images/', null=True, blank=True)
@@ -79,6 +88,15 @@ class ItemModel(models.Model):
         """Return all comments belonging to this item."""
         reviews = self.review_set.all()
         return reviews
+
+
+class ItemStatsModel(models.Model):
+    visits = models.BigIntegerField(default=0)
+    item = models.OneToOneField(
+        ItemModel,
+        on_delete=models.CASCADE,
+        related_name='stats'
+    )
 
 
 class ItemImageModel(models.Model):
@@ -158,7 +176,7 @@ class OrderModel(models.Model):
         return f'OrderModel {self.id} by {self.first_name} {self.last_name}'
 
 
-class Review(models.Model):
+class ReviewModel(models.Model):
     STATE_CHOCES = [
         ("pending", "в очікуванні"),
         ("visible", "видимий"),
