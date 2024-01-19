@@ -1,6 +1,9 @@
 import django_filters
 
-from .models import ItemModel
+from .models import (
+    ItemModel,
+    ReviewModel
+)
 
 
 class ItemFilter(django_filters.FilterSet):
@@ -17,3 +20,9 @@ class ItemFilter(django_filters.FilterSet):
     class Meta:
         model = ItemModel
         fields = ('stock', 'price', 'category__id_name')
+
+
+class ReviewFilter(django_filters.FilterSet):
+    class Meta:
+        model = ReviewModel
+        fields = ['stars', 'item__id']

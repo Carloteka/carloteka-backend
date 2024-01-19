@@ -1,11 +1,10 @@
-from django.contrib import admin
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
 
 from .apis import (
     CategoryListApi,
     ShopContactsRetrieveApi,
-    ItemListApi
+    ItemListApi,
+    ReviewListApi,
 )
 
 categories_urlpatterns = [
@@ -20,8 +19,13 @@ items_urlpatterns = [
     path('', ItemListApi.as_view(), name='list')
 ]
 
+reviews_urlpatterns = [
+    path('', ReviewListApi.as_view(), name='list')
+]
+
 urlpatterns = [
     path('categories/', include((categories_urlpatterns, 'categories'))),
     path('contacts/', include((contacts_urlpatterns, 'contacts'))),
     path('items/', include((items_urlpatterns, 'items'))),
+    path('reviews/', include((reviews_urlpatterns, 'reviews'))),
 ]

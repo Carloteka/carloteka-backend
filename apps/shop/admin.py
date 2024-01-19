@@ -12,9 +12,6 @@ class CategoryModelAdmin(admin.ModelAdmin):
     inlines = [CategoryImageInline]
 
 
-admin.site.register(CategoryModel, CategoryModelAdmin)
-
-
 class ItemImageInline(admin.TabularInline):
     list_display = '__all__'
     model = ItemImageModel
@@ -24,14 +21,17 @@ class ItemModelAdmin(admin.ModelAdmin):
     inlines = [ItemImageInline]
 
 
+admin.site.register(CategoryModel, CategoryModelAdmin)
 admin.site.register(ItemModel, ItemModelAdmin)
 admin.site.register(ShopContactsModel)
 admin.site.register(OrderModel)
+admin.site.register(ReviewModel)
 
 
-@admin.register(ReviewModel)
-class ReviewModelAdmin(admin.ModelAdmin):
-    list_display = ["id", "email", "first_name", "last_name", "text", "rate_by_stars", "state", "date", "updated_at"]
-    model = ReviewModel
+# TODO why we need this?
+# @admin.register(ReviewModel)
+# class ReviewModelAdmin(admin.ModelAdmin):
+#     list_display = ["id", "email", "first_name", "last_name", "text", "rate_by_stars", "state", "date", "updated_at"]
+#     model = ReviewModel
 
 
