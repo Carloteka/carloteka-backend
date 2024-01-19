@@ -94,9 +94,9 @@ class ItemListApi(APIView, ItemSelector):
         responses={200: OutputSerializer()},
         parameters=[
             OpenApiParameter(
-                name='category__id_name',
+                name='category__id',
                 location=OpenApiParameter.QUERY,
-                description='category id name',
+                description='category id',
                 required=False,
                 type=str,
                 many=True

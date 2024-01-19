@@ -15,11 +15,11 @@ class ItemFilter(django_filters.FilterSet):
             ('price', 'price')
         )
     )
-    category__id_name = django_filters.AllValuesMultipleFilter()
+    category__id = django_filters.AllValuesMultipleFilter()
 
     class Meta:
         model = ItemModel
-        fields = ('stock', 'price', 'category__id_name')
+        fields = ('stock', 'price', 'category__id')
 
 
 class ReviewFilter(django_filters.FilterSet):
