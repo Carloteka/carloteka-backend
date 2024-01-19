@@ -10,12 +10,12 @@ from rest_framework.exceptions import NotFound
 
 
 class CategoryModel(models.Model):
-    id_name = models.CharField(max_length=50, unique=True)
+    id = models.CharField(max_length=50, unique=True, primary_key=True)
     name = models.CharField(max_length=128)
     description = models.TextField(max_length=5000)
 
     def __str__(self):
-        return self.id_name
+        return self.id
 
 
 class CategoryImageModel(models.Model):
@@ -38,7 +38,7 @@ class ItemModel(models.Model):
         ('BACKORDER', 'Очікується'),
         ('SPECIFIC_ORDER', 'Під замовлення'),
     ]
-    id_name = models.CharField(max_length=128, unique=True)
+    id = models.CharField(max_length=128, unique=True, primary_key=True)
     name = models.CharField(max_length=128)
     price = models.FloatField()
     discounted_price = models.FloatField(default=None, null=True, blank=True)
@@ -57,41 +57,23 @@ class ItemModel(models.Model):
     mini_image = models.ImageField(upload_to='images/', null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        # Open the uploaded image
         img = Image.open(self.mini_image)
-
-        # If the image has an alpha channel, convert it to RGB
-        # if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
-        #     rgb_img = img.convert('RGB')
-        # else:
-        #     rgb_img = img
-
-        # Resize it to 512x512 or smaller, keeping aspect ratio
         max_size = (512, 512)
         img.thumbnail(max_size, Image.LANCZOS)
-
-        # Save the image back to memory
         temp_thumb = BytesIO()
         img.save(temp_thumb, format='PNG')
         temp_thumb.seek(0)
-
-        # Save image field
         self.mini_image = File(temp_thumb, name=self.mini_image.name)
-
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.id_name
-
-
-    def get_reviews(self):
-        """Return all comments belonging to this item."""
-        reviews = self.review_set.all()
-        return reviews
+        return self.id
 
 
 class ItemStatsModel(models.Model):
     visits = models.BigIntegerField(default=0)
+    added_to_cart = models.BigIntegerField(default=0)
+    added_to_favorites = models.BigIntegerField(default=0)
     item = models.OneToOneField(
         ItemModel,
         on_delete=models.CASCADE,
@@ -171,6 +153,8 @@ class OrderModel(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     no_call_back = models.BooleanField(default=False, verbose_name="Не передзвонювати")
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    # TODO add clear_all (look in styleguide)
 
     def __str__(self):
         return f'OrderModel {self.id} by {self.first_name} {self.last_name}'
