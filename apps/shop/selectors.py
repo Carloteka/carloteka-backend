@@ -8,7 +8,10 @@ from .models import (
     OrderModel,
     ReviewModel
 )
-from .filters import ItemFilter
+from .filters import (
+    ItemFilter,
+    ReviewFilter
+)
 
 
 class CategorySelector:
@@ -29,3 +32,11 @@ class ItemSelector:
         queryset = ItemModel.objects.all()
 
         return ItemFilter(filters, queryset).qs
+
+
+class ReviewSelector:
+    def review_list(self, filters=None):
+        filters = filters or {}
+        queryset = ReviewModel.objects.all()
+
+        return ReviewFilter(filters, queryset)

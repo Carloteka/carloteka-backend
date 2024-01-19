@@ -182,7 +182,7 @@ class ReviewModel(models.Model):
         ("visible", "видимий"),
         ("invisible", "невидимий")
     ]
-    item_set = models.ForeignKey(ItemModel, related_name='review_set', on_delete=models.CASCADE)
+    item = models.ForeignKey(ItemModel, related_name='review_set', on_delete=models.CASCADE)
     email = models.EmailField(max_length=255)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -190,8 +190,8 @@ class ReviewModel(models.Model):
     text = models.TextField(blank=True, null=True)
     date = models.DateTimeField("create", auto_now_add=True)
     updated_at = models.DateTimeField("update", auto_now=True)
-    rate_by_stars = models.IntegerField(
-        "rate by stars", choices=[(i, i) for i in range(1, 6)], blank=True, null=True
+    stars = models.IntegerField(
+        "stars", choices=[(i, i) for i in range(1, 6)], blank=True, null=True
     )
 
     def __str__(self):

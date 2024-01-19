@@ -8,6 +8,7 @@ from .selectors import (
     CategorySelector,
     ShopContactsSelector,
     ItemSelector,
+    ReviewSelector,
 )
 from .models import (
     CategoryModel,
@@ -159,6 +160,69 @@ class ItemListApi(APIView, ItemSelector):
             pagination_class=self.Pagination,
             serializer_class=self.OutputSerializer,
             queryset=items,
+            request=request,
+            view=self
+        )
+
+
+class ReviewListApi(APIView, ReviewSelector):
+    class Pagination(LimitOffsetPagination):
+        default_limit = 10
+
+    class FilterSerializer(serializers.Serializer):
+        order_by = serializers.CharField(default='stars')
+        item__id = serializers.IntegerField()
+
+    class OutputSerializer(serializers.ModelSerializer):
+        class Meta:
+            ref_name = 'shop.ReviewOutputSerializer'
+            model = ReviewModel
+            fields = '__all__'
+
+    @extend_schema(
+        responses={200: OutputSerializer()},
+        parameters=[
+            OpenApiParameter(
+                name='order_by',
+                location=OpenApiParameter.QUERY,
+                description='order by stars',
+                required=False,
+                type=int,
+                enum=('stars', '-stars')
+            ),
+            OpenApiParameter(
+                name='limit',
+                location=OpenApiParameter.QUERY,
+                description='how many objects you get',
+                required=False,
+                type=int
+            ),
+            OpenApiParameter(
+                name='offset',
+                location=OpenApiParameter.QUERY,
+                description='page of objects',
+                required=False,
+                type=int
+            ),
+            OpenApiParameter(
+                name='Item id',
+                location=OpenApiParameter.QUERY,
+                description='Choose reviews with specific item',
+                required=False,
+                type=int
+            )
+        ],
+    )
+    def get(self, request):
+        filters_serializer = self.FilterSerializer(data=request.query_params)
+        filters_serializer.is_valid(raise_exception=True)
+        print(filters_serializer.validated_data)
+        reviews = self.review_list(filters=filters_serializer.validated_data)
+
+        return get_paginated_response(
+            pagination_class=self.Pagination,
+            serializer_class=self.OutputSerializer,
+            queryset=reviews,
             request=request,
             view=self
         )
