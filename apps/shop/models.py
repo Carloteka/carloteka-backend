@@ -10,7 +10,6 @@ from rest_framework.exceptions import NotFound
 
 
 class CategoryModel(models.Model):
-    id = models.CharField(max_length=50, unique=True, primary_key=True)
     name = models.CharField(max_length=128)
     description = models.TextField(max_length=5000)
 
@@ -38,7 +37,6 @@ class ItemModel(models.Model):
         ('BACKORDER', 'Очікується'),
         ('SPECIFIC_ORDER', 'Під замовлення'),
     ]
-    id = models.CharField(max_length=128, unique=True, primary_key=True)
     name = models.CharField(max_length=128)
     price = models.FloatField()
     discounted_price = models.FloatField(default=None, null=True, blank=True)
@@ -55,6 +53,9 @@ class ItemModel(models.Model):
     category = models.ForeignKey(CategoryModel, related_name='item_set', null=True, blank=True,
                                  on_delete=models.SET_NULL)
     mini_image = models.ImageField(upload_to='images/', null=True, blank=True)
+    slug = models.SlugField(max_length=100, db_index=True, unique=True)
+    starts = models.FloatField(default=0)
+    review_count = models.IntegerField(default=0)
 
     def save(self, *args, **kwargs):
         img = Image.open(self.mini_image)
@@ -102,8 +103,6 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
 
 
 class ShopContactsModel(models.Model):
-    address_text = models.CharField(max_length=100)
-    address_googlemaps_link = models.CharField(max_length=100)
     work_time_mo_fr = models.CharField(max_length=100)
     work_time_sa = models.CharField(max_length=100)
     work_time_su = models.CharField(max_length=100)
