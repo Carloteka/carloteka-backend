@@ -3,7 +3,16 @@ from django.db import transaction
 import random
 from django.core.management.base import BaseCommand
 from django.core.files import File
-from apps.shop.models import CategoryModel, CategoryImageModel, ItemModel, ShopContactsModel, ItemImageModel
+from apps.shop.models import (
+    CategoryModel,
+    CategoryImageModel,
+    ItemModel,
+    ShopContactsModel,
+    ItemImageModel,
+    ItemStatsModel,
+    ReviewModel,
+    OrderModel
+)
 from django.conf import settings
 from random import randint
 
@@ -13,10 +22,12 @@ num_category_entries = 2
 class Command(BaseCommand):
     help = 'Generate entries for ShopContactsModel, CategoryModel, CategoryImageModel, ItemModel and ItemImageModel.'
 
+    @transaction.atomic()
     def handle(self, *args, **options):
         self.shop_contacts()
         self.category()
         self.item()
+        self.item_stats()
 
     def shop_contacts(self):
         contact_data = {
@@ -104,7 +115,31 @@ class Command(BaseCommand):
 
         stock_distribution = ['IN_STOCK'] * 75 + ['OUT_OF_STOCK'] * 25 + ['BACKORDER'] * 25 + ['SPECIFIC_ORDER'] * 25
 
+        if len(ItemModel.objects.all()) >= 299:
+            pass
+        else:
+            with transaction.atomic():
+                categories = CategoryModel.objects.all()
+                for category in categories:
+                    generate_items(150, category.name, category.name, stock_distribution)
+
+    def item_stats(self):
+        def generate_item_stats():
+            items = ItemModel.objects.all()
+            for item in items:
+                visits = random.randint(30000, 500000)
+                added_to_cart = random.randint(750, 10000)
+                added_to_favorites = random.randint(750, 10000)
+
+                item_stats = ItemStatsModel(
+                    visits=visits,
+                    added_to_cart=added_to_cart,
+                    added_to_favorites=added_to_favorites,
+                    item=item
+                )
+
+                item_stats.save()
+                print(f'Статистика для товару "{item.name}" була успішно згенерована та збережена в базі даних.')
+
         with transaction.atomic():
-            categories = CategoryModel.objects.all()
-            for category in categories:
-                generate_items(150, category.name, category.name, stock_distribution)
+            generate_item_stats()
