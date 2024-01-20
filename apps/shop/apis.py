@@ -76,8 +76,8 @@ class ItemListApi(APIView, ItemSelector):
 
         order_by = serializers.CharField(default='price')
 
-        category__id_name = serializers.ListField(
-            child=serializers.CharField(),
+        category__id = serializers.ListField(
+            child=serializers.IntegerField(),
             required=False
         )
 
@@ -98,7 +98,7 @@ class ItemListApi(APIView, ItemSelector):
                 location=OpenApiParameter.QUERY,
                 description='category id',
                 required=False,
-                type=str,
+                type=int,
                 many=True
             ),
             OpenApiParameter(
@@ -187,7 +187,7 @@ class ReviewListApi(APIView, ReviewSelector):
                 location=OpenApiParameter.QUERY,
                 description='order by stars',
                 required=False,
-                type=int,
+                type=str,
                 enum=('stars', '-stars')
             ),
             OpenApiParameter(
@@ -208,7 +208,7 @@ class ReviewListApi(APIView, ReviewSelector):
                 name='Item id',
                 location=OpenApiParameter.QUERY,
                 description='Choose reviews with specific item',
-                required=False,
+                required=True,
                 type=int
             )
         ],
