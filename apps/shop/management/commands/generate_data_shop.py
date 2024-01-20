@@ -1,21 +1,36 @@
 import os
-import datetime
+from django.db import transaction
 import random
 from django.core.management.base import BaseCommand
 from django.core.files import File
-from apps.shop.models import CategoryModel, CategoryImageModel, ItemModel, ShopContactsModel, ItemImageModel
+from apps.shop.models import (
+    CategoryModel,
+    CategoryImageModel,
+    ItemModel,
+    ShopContactsModel,
+    ItemImageModel,
+    ItemStatsModel,
+    ReviewModel,
+    OrderModel
+)
 from django.conf import settings
 from random import randint
+
+num_category_entries = 2
 
 
 class Command(BaseCommand):
     help = 'Generate entries for ShopContactsModel, CategoryModel, CategoryImageModel, ItemModel and ItemImageModel.'
 
+    @transaction.atomic()
     def handle(self, *args, **options):
-        # Adding data for ShopContactsModel
+        self.shop_contacts()
+        self.category()
+        self.item()
+        self.item_stats()
+
+    def shop_contacts(self):
         contact_data = {
-            'address_text': 'Вулиця Приклад, 111',
-            'address_googlemaps_link': 'https://maps.example.com',
             'work_time_mo_fr': '9:00 - 18:00',
             'work_time_sa': '10:00 - 16:00',
             'work_time_su': 'вихідний',
@@ -25,86 +40,106 @@ class Command(BaseCommand):
             'telegram_link': 'https://telegram.example.com'
         }
 
-        ShopContactsModel.objects.update_or_create(defaults=contact_data)
-        self.stdout.write(self.style.SUCCESS('Successfully generated data for ShopContactsModel'))
+        ShopContactsModel.objects.update_or_create(**contact_data)
 
-        # Parameters for CategoryModel and CategoryImageModel
-        num_category_entries = 4
-        category_image_filename = 'apps/shop/management/img/img_data.png'
-        category_image_path = os.path.join(settings.BASE_DIR, category_image_filename)
+    def category(self):
+        existing_categories = CategoryModel.objects.all()
+        if len(existing_categories) >= 2:
+            pass
 
-        # Generating records for CategoryModel and CategoryImageModel
-        for i in range(num_category_entries):
-            timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
-            unique_id_name = f"ID_{timestamp}_{i}"
+        else:
+            categories_data = [
+                {
+                    'name': "Дерев'яні мечі, щити, катани, шаблі",
+                    'description': "Тут ви знайдете різну дерев'яну зроброю, таку як: Мечі, Шити, Катани, Саблі, Шашки, "
+                                   "на будь який смак та рік, від невеликих вакідзасі для дітей, до великих двохметрових "
+                                   "мечів, які підніме тількі людина із стальними м'язами",
+                    "image_path": "apps/shop/management/img/category/sward.png"
+                },
+                {
+                    'name': "Шахи, шашки, нарди",
+                    'description': "У цій категорії ви знайдете шахи, шкаки, та нарди. Всі вони виключно преміальної якості"
+                                   "виготовленя вручну нашими майстрами",
+                    "image_path": "apps/shop/management/img/category/chess.jpg"
+                }
+            ]
 
-            category = CategoryModel.objects.create(id_name=unique_id_name, name="Ім'я категорії", description="Опис категорії")
-            with open(category_image_path, 'rb') as image_file:
-                django_file = File(image_file)
-                image_instance = CategoryImageModel(product_model=category)
-                image_instance.image.save(f'image_{i}.png', django_file, save=True)
-
-            self.stdout.write(self.style.SUCCESS(f'Image for category {category.id_name} created successfully'))
-
-        # Parameters for ItemModel
-        num_item_entries = 100
-        items_per_category = num_item_entries // num_category_entries
-        item_image_filename = 'apps/shop/management/img/img_data.png'
-        item_image_path = os.path.join(settings.BASE_DIR, item_image_filename)
-
-        categories = CategoryModel.objects.all()
-        if not categories:
-            self.stdout.write(self.style.ERROR('No categories available. Please create some CategoryModel entries first.'))
-            return
-
-        # Generating records for ItemModel
-        for i in range(num_item_entries):
-            category_index = i // items_per_category
-            category = categories[category_index % len(categories)]
-
-            timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
-            id_name = f"Ваза декоративна_{timestamp}_{i}"
-            name = "Ваза"
-            price = 50.0
-            discounted_price = 45.0
-            length = 1.5
-            height = 2.0
-            width = 0.5
-            in_stock = random.randint(0, 3)
-            mini_description = "Ваза"
-            description = "Ваза"
-            visits = 0
-
-            item = ItemModel(
-                id_name=id_name,
-                name=name,
-                price=price,
-                discounted_price=discounted_price,
-                length=length,
-                height=height,
-                width=width,
-                in_stock=in_stock,
-                mini_description=mini_description,
-                description=description,
-                visits=visits,
-                category=category
-            )
-
-            if os.path.exists(item_image_path):
-                with open(item_image_path, 'rb') as image_file:
+            for i in categories_data:
+                category = CategoryModel.objects.create(name=i['name'], description=i['description'])
+                with open(os.path.join(settings.BASE_DIR, i['image_path']), 'rb') as image_file:
                     django_file = File(image_file)
-                    item.mini_image.save(f'mini_image_{i}.png', django_file, save=False)
+                    image_instance = CategoryImageModel(product_model=category)
+                    image_instance.image.save(f'image_{i["name"]}.png', django_file, save=True)
 
-            item.save()
-            self.stdout.write(self.style.SUCCESS(f'Item {name} created successfully with id {id_name}'))
+    def item(self):
 
-        for item in ItemModel.objects.all():
-            num_images = randint(3, 7)
-            for _ in range(num_images):
-                with open(item_image_path, 'rb') as image_file:
-                    django_file = File(image_file)
-                    item_image = ItemImageModel(product_model=item)
-                    item_image.image.save(f'image_{item.pk}_{randint(1000, 9999)}.png', django_file, save=True)
-                self.stdout.write(self.style.SUCCESS(f'Created {num_images} images for item {item.pk}'))
+        def generate_items(n, theme, category_name, stock_distribution):
+            # Отримуємо категорію з бази даних
+            category = CategoryModel.objects.get(name=category_name)
 
-        self.stdout.write(self.style.SUCCESS(f'Successfully generated entries for CategoryModel, CategoryImageModel, and ItemModel'))
+            for i in range(n):
+                name = f'{theme} #{i + 1}'
+                price = round(random.uniform(100, 1000), 2)
+                length = random.uniform(50, 200)
+                stock = stock_distribution[i % len(stock_distribution)]
+                mini_description = f'Це {theme.lower()} з унікальним дизайном.'
+                description = (f'{name} - це високоякісний {theme.lower()} з унікальним дизайном. Він виготовлений'
+                               f' з високоякісних матеріалів і має привабливий вигляд.')
+                slug = f'{theme.lower()}-{i + 1}'
+
+                # Відкриваємо файл зображення
+                with open(f'apps/shop/management/img/sward.png', 'rb') as img_file:
+                    # Створюємо новий екземпляр моделі ItemModel
+                    item = ItemModel(
+                        name=name,
+                        price=price,
+                        length=length,
+                        stock=stock,
+                        mini_description=mini_description,
+                        description=description,
+                        slug=slug,
+                        category=category,
+                        mini_image=File(img_file),
+                    )
+
+                    # Зберігаємо об'єкт в базі даних
+                    item.save()
+
+                    # Додаємо три зображення до товару
+                    for _ in range(3):
+                        item_image = ItemImageModel(image=File(img_file), product_model=item)
+                        item_image.save()
+
+                    # Друкуємо повідомлення в консолі
+                    print(f'Товар "{name}" було успішно згенеровано та збережено в базі даних.')
+
+        stock_distribution = ['IN_STOCK'] * 75 + ['OUT_OF_STOCK'] * 25 + ['BACKORDER'] * 25 + ['SPECIFIC_ORDER'] * 25
+
+        if len(ItemModel.objects.all()) >= 299:
+            pass
+        else:
+            with transaction.atomic():
+                categories = CategoryModel.objects.all()
+                for category in categories:
+                    generate_items(150, category.name, category.name, stock_distribution)
+
+    def item_stats(self):
+        def generate_item_stats():
+            items = ItemModel.objects.all()
+            for item in items:
+                visits = random.randint(30000, 500000)
+                added_to_cart = random.randint(750, 10000)
+                added_to_favorites = random.randint(750, 10000)
+
+                item_stats = ItemStatsModel(
+                    visits=visits,
+                    added_to_cart=added_to_cart,
+                    added_to_favorites=added_to_favorites,
+                    item=item
+                )
+
+                item_stats.save()
+                print(f'Статистика для товару "{item.name}" була успішно згенерована та збережена в базі даних.')
+
+        with transaction.atomic():
+            generate_item_stats()
