@@ -14,7 +14,7 @@ class CategoryModel(models.Model):
     description = models.TextField(max_length=5000)
 
     def __str__(self):
-        return self.id
+        return self.name
 
 
 class CategoryImageModel(models.Model):
@@ -68,7 +68,7 @@ class ItemModel(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.id
+        return self.name
 
 
 class ItemStatsModel(models.Model):

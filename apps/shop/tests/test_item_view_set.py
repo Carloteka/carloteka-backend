@@ -13,7 +13,7 @@ from apps.shop.models import CategoryModel, ItemModel
 class TestReview:
     @pytest.fixture()
     def initialize_task_db(self):
-        item_image_filename = "apps/shop/management/img/img_data.png"
+        item_image_filename = "apps/shop/management/img/sward.png"
         item_image_path = os.path.join(settings.BASE_DIR, item_image_filename)
         category1 = CategoryModel.objects.create(
             id_name="id_name1", name="name1", description="description1"
