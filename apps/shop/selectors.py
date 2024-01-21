@@ -33,6 +33,14 @@ class ItemSelector:
 
         return ItemFilter(filters, queryset).qs
 
+    def item_retrieve(self, item_slug):
+        # TODO if object is visible - send; else - throw error 404 (in theory 403,
+        #  but user should not know that we have it)
+        queryset = ItemModel.objects.get(slug=item_slug)
+        print(queryset)
+
+        return queryset
+
 
 class ReviewSelector:
     def review_list(self, filters=None):
