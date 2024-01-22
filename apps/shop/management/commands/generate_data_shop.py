@@ -14,7 +14,8 @@ from apps.shop.models import (
     OrderModel
 )
 from django.conf import settings
-from random import randint
+from datetime import timedelta
+from django.utils import timezone
 
 num_category_entries = 2
 
@@ -28,6 +29,7 @@ class Command(BaseCommand):
         self.category()
         self.item()
         self.item_stats()
+        self.review()
 
     def shop_contacts(self):
         contact_data = {
@@ -113,6 +115,7 @@ class Command(BaseCommand):
                         slug=slug,
                         category=category,
                         mini_image=File(img_file),
+                        stars=random.randint(1, 6)
                     )
 
                     # Зберігаємо об'єкт в базі даних
@@ -138,21 +141,76 @@ class Command(BaseCommand):
 
     def item_stats(self):
         def generate_item_stats():
-            items = ItemModel.objects.all()
-            for item in items:
-                visits = random.randint(30000, 500000)
-                added_to_cart = random.randint(750, 10000)
-                added_to_favorites = random.randint(750, 10000)
+            stats = ItemStatsModel.objects.all()
+            if len(stats) > 50:
+                pass
 
-                item_stats = ItemStatsModel(
-                    visits=visits,
-                    added_to_cart=added_to_cart,
-                    added_to_favorites=added_to_favorites,
-                    item=item
-                )
+            else:
+                items = ItemModel.objects.all()
 
-                item_stats.save()
-                print(f'Статистика для товару "{item.name}" була успішно згенерована та збережена в базі даних.')
+                for item in items:
+                    visits = random.randint(30000, 500000)
+                    added_to_cart = random.randint(750, 10000)
+                    added_to_favorites = random.randint(750, 10000)
+
+                    item_stats = ItemStatsModel(
+                        visits=visits,
+                        added_to_cart=added_to_cart,
+                        added_to_favorites=added_to_favorites,
+                        item=item
+                    )
+
+                    item_stats.save()
+
+                    print(f'Статистика для товару "{item.name}" була успішно згенерована та збережена в базі даних.')
 
         with transaction.atomic():
             generate_item_stats()
+
+    def review(self):
+        def generate_review_data():
+            # Predefined Ukrainian texts
+            ukrainian_texts = [
+                "Це чудовий продукт!",
+                "Я вражений якістю цього товару.",
+                "Не рекомендую цей продукт.",
+                "Цей товар не вартує своєї ціни.",
+                "Я обов'язково куплю це знову!"
+            ]
+
+            # Get all items
+            items = ItemModel.objects.all()
+
+            with transaction.atomic():
+                for item in items:
+                    # Generate a random number of reviews for each item
+                    for _ in range(random.randint(3, 30)):
+                        # Generate data
+                        email = f"{random.randint(1, 1000)}@example.com"
+                        first_name = "Ім'я" + str(random.randint(1, 100))
+                        last_name = "Прізвище" + str(random.randint(1, 100))
+                        state = random.choice(["pending", "visible", "invisible"])
+                        text = random.choice(ukrainian_texts)
+                        stars = random.randint(1, 5)
+
+                        # Generate a random date between 1 year ago and yesterday
+                        one_year_ago = timezone.now() - timedelta(days=365)
+                        yesterday = timezone.now() - timedelta(days=1)
+                        date = one_year_ago + (yesterday - one_year_ago) * random.random()
+                        updated_at = timezone.now()
+
+                        # Create and save the review
+                        review = ReviewModel(
+                            item=item,
+                            email=email,
+                            first_name=first_name,
+                            last_name=last_name,
+                            state=state,
+                            text=text,
+                            date=date,
+                            updated_at=updated_at,
+                            stars=stars,
+                        )
+                        review.save()
+
+        generate_review_data()

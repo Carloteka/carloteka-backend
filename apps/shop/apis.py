@@ -84,7 +84,7 @@ class ItemRetrieveApi(APIView, ItemSelector):
         length = serializers.FloatField(allow_null=True, required=False)
         height = serializers.FloatField(allow_null=True, required=False)
         width = serializers.FloatField(allow_null=True, required=False)
-        stock = serializers.ChoiceField(choices=ItemModel.STOCK_STATUS_CHOCES)
+        stock = serializers.ChoiceField(choices=ItemModel.STOCK_STATUS_CHOiCES)
         mini_description = serializers.CharField(max_length=2500)
         description = serializers.CharField(max_length=5000)
         image_set = inline_serializer(many=True, fields={
@@ -92,7 +92,8 @@ class ItemRetrieveApi(APIView, ItemSelector):
             'image': serializers.ImageField()
         })
         category = inline_serializer(fields={
-            'id': serializers.IntegerField()
+            'id': serializers.IntegerField(),
+            'name': serializers.CharField()
         })
         mini_image = serializers.ImageField(allow_null=True, required=False)
         slug = serializers.SlugField(max_length=100)
