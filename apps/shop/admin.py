@@ -1,6 +1,15 @@
 from django.contrib import admin
 
-from .models import CategoryModel, CategoryImageModel, ItemModel, ItemImageModel, ShopContactsModel, OrderModel, ReviewModel
+from .models import (
+    CategoryModel,
+    CategoryImageModel,
+    ItemModel,
+    ItemImageModel,
+    ShopContactsModel,
+    OrderModel,
+    ReviewModel,
+    ItemStatsModel
+)
 
 
 class CategoryImageInline(admin.TabularInline):
@@ -26,7 +35,7 @@ admin.site.register(ItemModel, ItemModelAdmin)
 admin.site.register(ShopContactsModel)
 admin.site.register(OrderModel)
 admin.site.register(ReviewModel)
-
+admin.site.register(ItemStatsModel)
 
 # TODO why we need this?
 # @admin.register(ReviewModel)
