@@ -39,4 +39,4 @@ class ReviewSelector:
         filters = filters or {}
         queryset = ReviewModel.objects.all()
 
-        return ReviewFilter(filters, queryset)
+        return ReviewFilter(filters, queryset).qs

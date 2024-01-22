@@ -171,7 +171,7 @@ class ReviewListApi(APIView, ReviewSelector):
 
     class FilterSerializer(serializers.Serializer):
         order_by = serializers.CharField(default='stars')
-        item__id = serializers.IntegerField()
+        item_id = serializers.IntegerField()
 
     class OutputSerializer(serializers.ModelSerializer):
         class Meta:
@@ -205,7 +205,7 @@ class ReviewListApi(APIView, ReviewSelector):
                 type=int
             ),
             OpenApiParameter(
-                name='Item id',
+                name='item_id',
                 location=OpenApiParameter.QUERY,
                 description='Choose reviews with specific item',
                 required=True,
