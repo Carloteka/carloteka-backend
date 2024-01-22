@@ -131,7 +131,10 @@ class ItemListApi(APIView, ItemSelector):
 
     class OutputSerializer(serializers.ModelSerializer):
 
-        images = ItemImageSerializer(many=True)
+        image_set = inline_serializer(many=True, fields={
+            'id': serializers.IntegerField(),
+            'image': serializers.ImageField()
+        })
 
         class Meta:
             ref_name = 'shop.ItemListOutputSerializer'
