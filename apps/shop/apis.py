@@ -32,7 +32,11 @@ from .utils import (
 
 class CategoryListApi(APIView, CategorySelector):
     class OutputSerializer(serializers.ModelSerializer):
-        images = CategoryImageSerializer(many=True)
+        image_set = inline_serializer(many=True, fields={
+            'id': serializers.IntegerField(),
+            'image': serializers.ImageField()
+        }
+        )
 
         class Meta:
             ref_name = 'shop.CategoryListOutputSerializer'
