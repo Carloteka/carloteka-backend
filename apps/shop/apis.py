@@ -1,4 +1,3 @@
-from drf_spectacular.types import OpenApiTypes
 from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -25,6 +24,9 @@ from .serializers import (
 )
 from .pagination import (
     get_paginated_response, LimitOffsetPagination
+)
+from .utils import (
+    inline_serializer
 )
 
 
@@ -58,6 +60,48 @@ class ShopContactsRetrieveApi(APIView, ShopContactsSelector):
     )
     def get(self, request):
         queryset = self.shop_contacts_retrieve_no_pk()
+        data = self.OutputSerializer(queryset).data
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class ItemRetrieveApi(APIView, ItemSelector):
+    class OutputSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        name = serializers.CharField(max_length=128)
+        price = serializers.FloatField()
+        discounted_price = serializers.FloatField(allow_null=True, required=False)
+        length = serializers.FloatField(allow_null=True, required=False)
+        height = serializers.FloatField(allow_null=True, required=False)
+        width = serializers.FloatField(allow_null=True, required=False)
+        stock = serializers.ChoiceField(choices=ItemModel.STOCK_STATUS_CHOCES)
+        mini_description = serializers.CharField(max_length=2500)
+        description = serializers.CharField(max_length=5000)
+        image_set = inline_serializer(many=True, fields={
+            'id': serializers.IntegerField(),
+            'image': serializers.ImageField()
+        })
+        category = inline_serializer(fields={
+            'id': serializers.IntegerField()
+        })
+        mini_image = serializers.ImageField(allow_null=True, required=False)
+        slug = serializers.SlugField(max_length=100)
+        starts = serializers.FloatField(default=0)
+        review_count = serializers.IntegerField(default=0)
+
+    @extend_schema(
+        responses={200: OutputSerializer()},
+        parameters=[
+            OpenApiParameter(
+                name='item_slug',
+                location=OpenApiParameter.PATH,
+                description='item slug',
+                required=True,
+                type=str
+            )
+        ]
+    )
+    def get(self, request, item_slug):
+        queryset = self.item_retrieve(item_slug=item_slug)
         data = self.OutputSerializer(queryset).data
         return Response(data, status=status.HTTP_200_OK)
 

@@ -4,6 +4,7 @@ from .apis import (
     CategoryListApi,
     ShopContactsRetrieveApi,
     ItemListApi,
+    ItemRetrieveApi,
     ReviewListApi,
 )
 
@@ -16,7 +17,8 @@ contacts_urlpatterns = [
 ]
 
 items_urlpatterns = [
-    path('', ItemListApi.as_view(), name='list')
+    path('', ItemListApi.as_view(), name='list'),
+    path('<str:item_slug>/', ItemRetrieveApi.as_view(), name='retrieve')
 ]
 
 reviews_urlpatterns = [
