@@ -31,17 +31,17 @@ from .utils import (
 
 
 class CategoryListApi(APIView, CategorySelector):
-    class OutputSerializer(serializers.ModelSerializer):
+    class OutputSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
         image_set = inline_serializer(many=True, fields={
             'id': serializers.IntegerField(),
             'image': serializers.ImageField()
-        }
-        )
+        })
+        name = serializers.CharField()
+        description = serializers.CharField()
 
         class Meta:
             ref_name = 'shop.CategoryListOutputSerializer'
-            model = CategoryModel
-            fields = '__all__'
 
     @extend_schema(
         responses={200: OutputSerializer()}
@@ -53,11 +53,18 @@ class CategoryListApi(APIView, CategorySelector):
 
 
 class ShopContactsRetrieveApi(APIView, ShopContactsSelector):
-    class OutputSerializer(serializers.ModelSerializer):
+    class OutputSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        work_time_mo_fr = serializers.CharField(max_length=100)
+        work_time_sa = serializers.CharField(max_length=100)
+        work_time_su = serializers.CharField(max_length=100)
+        admin_phone = serializers.CharField(max_length=100)
+        email = serializers.CharField(max_length=100)
+        viber_link = serializers.CharField(max_length=100)
+        telegram_link = serializers.CharField(max_length=100)
+
         class Meta:
             ref_name = 'shop.ShopContactsRetrieveOutputSerializer'
-            model = ShopContactsModel
-            fields = '__all__'
 
     @extend_schema(
         responses={200: OutputSerializer()}
@@ -89,8 +96,11 @@ class ItemRetrieveApi(APIView, ItemSelector):
         })
         mini_image = serializers.ImageField(allow_null=True, required=False)
         slug = serializers.SlugField(max_length=100)
-        starts = serializers.FloatField(default=0)
+        stars = serializers.FloatField(default=0)
         review_count = serializers.IntegerField(default=0)
+
+        class Meta:
+            ref_name = 'shop.ItemRetrieveOutputSerializer'
 
     @extend_schema(
         responses={200: OutputSerializer()},
@@ -129,14 +139,30 @@ class ItemListApi(APIView, ItemSelector):
             required=False
         )
 
-    class OutputSerializer(serializers.ModelSerializer):
-
-        images = ItemImageSerializer(many=True)
+    class OutputSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        name = serializers.CharField(max_length=128)
+        price = serializers.FloatField()
+        discounted_price = serializers.FloatField(allow_null=True, required=False)
+        length = serializers.FloatField(allow_null=True, required=False)
+        height = serializers.FloatField(allow_null=True, required=False)
+        width = serializers.FloatField(allow_null=True, required=False)
+        stock = serializers.ChoiceField(choices=ItemModel.STOCK_STATUS_CHOCES)
+        mini_description = serializers.CharField(max_length=2500)
+        image_set = inline_serializer(many=True, fields={
+            'id': serializers.IntegerField(),
+            'image': serializers.ImageField()
+        })
+        category = inline_serializer(fields={
+            'id': serializers.IntegerField()
+        })
+        mini_image = serializers.ImageField(allow_null=True, required=False)
+        slug = serializers.SlugField(max_length=100)
+        stars = serializers.FloatField(default=0)
+        review_count = serializers.IntegerField(default=0)
 
         class Meta:
             ref_name = 'shop.ItemListOutputSerializer'
-            model = ItemModel
-            fields = '__all__'
 
     @extend_schema(
         responses={200: OutputSerializer()},

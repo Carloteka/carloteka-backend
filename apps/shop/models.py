@@ -54,7 +54,7 @@ class ItemModel(models.Model):
                                  on_delete=models.SET_NULL)
     mini_image = models.ImageField(upload_to='images/', null=True, blank=True)
     slug = models.SlugField(max_length=100, db_index=True, unique=True)
-    starts = models.FloatField(default=0)
+    stars = models.FloatField(default=0)
     review_count = models.IntegerField(default=0)
 
     def save(self, *args, **kwargs):
