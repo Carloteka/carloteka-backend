@@ -31,7 +31,7 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
 
 
 class ItemModel(models.Model):
-    STOCK_STATUS_CHOiCES = [
+    STOCK_STATUS_CHOICES = [
         ('IN_STOCK', 'В наявносі'),
         ('OUT_OF_STOCK', 'Немає в наявності'),
         ('BACKORDER', 'Очікується'),
@@ -45,7 +45,7 @@ class ItemModel(models.Model):
     width = models.FloatField(default=None, null=True, blank=True)
     stock = models.CharField(
         max_length=40,
-        choices=STOCK_STATUS_CHOiCES,
+        choices=STOCK_STATUS_CHOICES,
         default='IN_STOCK'
     )
     mini_description = models.TextField(max_length=2500)
