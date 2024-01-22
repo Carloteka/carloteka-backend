@@ -85,7 +85,8 @@ class ItemRetrieveApi(APIView, ItemSelector):
             'image': serializers.ImageField()
         })
         category = inline_serializer(fields={
-            'id': serializers.IntegerField()
+            'id': serializers.IntegerField(),
+            'name': serializers.CharField()
         })
         mini_image = serializers.ImageField(allow_null=True, required=False)
         slug = serializers.SlugField(max_length=100)
