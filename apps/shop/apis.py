@@ -1,4 +1,3 @@
-from drf_spectacular.types import OpenApiTypes
 from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -25,6 +24,9 @@ from .serializers import (
 )
 from .pagination import (
     get_paginated_response, LimitOffsetPagination
+)
+from .utils import (
+    inline_serializer
 )
 
 
@@ -74,13 +76,13 @@ class ItemRetrieveApi(APIView, ItemSelector):
         stock = serializers.ChoiceField(choices=ItemModel.STOCK_STATUS_CHOCES)
         mini_description = serializers.CharField(max_length=2500)
         description = serializers.CharField(max_length=5000)
-        # TODO add inline_serializer to images and category
-        category = serializers.PrimaryKeyRelatedField(
-            queryset=CategoryModel.objects.all(),
-            allow_null=True,
-            required=False
-        )
-        images = ItemImageSerializer(many=True)
+        image_set = inline_serializer(many=True, fields={
+            'id': serializers.IntegerField(),
+            'image': serializers.ImageField()
+        })
+        category = inline_serializer(fields={
+            'id': serializers.IntegerField()
+        })
         mini_image = serializers.ImageField(allow_null=True, required=False)
         slug = serializers.SlugField(max_length=100)
         starts = serializers.FloatField(default=0)

@@ -84,7 +84,7 @@ class ItemStatsModel(models.Model):
 
 class ItemImageModel(models.Model):
     image = models.ImageField(upload_to='images', null=True)
-    product_model = models.ForeignKey(ItemModel, related_name='images', on_delete=models.CASCADE,
+    product_model = models.ForeignKey(ItemModel, related_name='image_set', on_delete=models.CASCADE,
                                       null=True, blank=True, default=None)
 
 
