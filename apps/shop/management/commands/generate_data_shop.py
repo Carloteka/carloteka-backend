@@ -78,8 +78,7 @@ class Command(BaseCommand):
         def generate_items(n, theme, category_name, stock_distribution):
             # Отримуємо категорію з бази даних
             category = CategoryModel.objects.get(name=category_name)
-            with open(f'apps/shop/management/img/sward.png', 'rb') as img_file:
-                image_file = File(img_file)
+            with open(f'apps/shop/management/img/sward_mini.webp', 'rb') as img_file:
                 item_set = []
                 for i in range(n):
                     name = f'{theme} #{i + 1}'
@@ -113,7 +112,7 @@ class Command(BaseCommand):
                         description=description,
                         slug=slug,
                         category=category,
-                        mini_image=image_file,
+                        mini_image=File(img_file),
                         stars=random.randint(1, 6)
                     )
                     item_set.append(item)

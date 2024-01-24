@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'django_filters',
 
+    'apps.core',
     'apps.accounts',
     'apps.shop',
 ]
