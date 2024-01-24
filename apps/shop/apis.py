@@ -1,6 +1,8 @@
+from drf_spectacular.types import OpenApiTypes
 from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import APIException
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from apps.core.exceptions import (
     DEFAULT_400_EXCEPTION_DETAIL,
@@ -113,7 +115,7 @@ class ItemRetrieveApi(APIView, ItemSelector):
     @extend_schema(
         responses={
             200: OutputSerializer(),
-            404: {"detail": DEFAULT_404_EXCEPTION_DETAIL}
+            404: {"detail": DEFAULT_404_EXCEPTION_DETAIL},
         },
         parameters=[
             OpenApiParameter(
