@@ -278,10 +278,10 @@ class ReviewListApi(APIView, ReviewSelector):
             )
         ],
     )
-    def get(self, request, item_slug):
+    def get(self, request, item_id):
         filters_serializer = self.FilterSerializer(data=request.query_params)
         filters_serializer.is_valid(raise_exception=True)
-        reviews = self.review_list(filters=filters_serializer.validated_data, item_slug=item_slug)
+        reviews = self.review_list(filters=filters_serializer.validated_data, item_id=item_id)
 
         return get_paginated_response(
             pagination_class=self.Pagination,

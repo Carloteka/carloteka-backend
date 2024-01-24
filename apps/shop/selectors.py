@@ -44,10 +44,10 @@ class ItemSelector:
 
 
 class ReviewSelector:
-    def review_list(self, item_slug, filters=None):
+    def review_list(self, item_id, filters=None):
         filters = filters or {}
         try:
-            queryset = ItemModel.objects.get(slug=item_slug).review_set
+            queryset = ItemModel.objects.get(pk=item_id).review_set
         except ItemModel.DoesNotExist:
             raise Http404()
         return ReviewFilter(filters, queryset).qs
