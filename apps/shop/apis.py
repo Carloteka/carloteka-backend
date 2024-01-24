@@ -104,7 +104,10 @@ class ItemRetrieveApi(APIView, ItemSelector):
             ref_name = 'shop.ItemRetrieveOutputSerializer'
 
     @extend_schema(
-        responses={200: OutputSerializer()},
+        responses={
+            200: OutputSerializer(),
+            404: {"detail": "Not found"}
+        },
         parameters=[
             OpenApiParameter(
                 name='item_slug',
