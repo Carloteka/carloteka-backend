@@ -28,6 +28,7 @@ class Command(BaseCommand):
         self.shop_contacts()
         self.category()
         self.item()
+        self.item_images()
         self.item_stats()
         self.review()
 
@@ -74,37 +75,35 @@ class Command(BaseCommand):
                     image_instance.image.save(f'image_{i["name"]}.png', django_file, save=True)
 
     def item(self):
-
         def generate_items(n, theme, category_name, stock_distribution):
             # Отримуємо категорію з бази даних
             category = CategoryModel.objects.get(name=category_name)
+            with open(f'apps/shop/management/img/sward.png', 'rb') as img_file:
+                image_file = File(img_file)
+                item_set = []
+                for i in range(n):
+                    name = f'{theme} #{i + 1}'
+                    price = round(random.uniform(100, 1000), 2)
+                    length = random.uniform(50, 200)
+                    stock = stock_distribution[i % len(stock_distribution)]
+                    mini_description = f'Це {theme.lower()} з унікальним дизайном.'
+                    description = (f'{name} - це високоякісний {theme.lower()} з унікальним дизайном. '
+                                   f'Він виготовлений з вищого сорту дерева, '
+                                   f'має розмір {length} см, що робить його ідеальним для зручного використання. '
+                                   f'Цей {theme.lower()} виконаний з великою увагою до деталей, '
+                                   f'що підкреслює його високу якість та унікальність. '
+                                   f'Він виготовлений з високоякісних матеріалів, '
+                                   f'що гарантують його довговічність та надійність. '
+                                   f'Цей {theme.lower()} є відмінним доповненням до будь-якої колекції '
+                                   f'або може слугувати прекрасним подарунком. '
+                                   f'Він виготовлений з високоякісного дерева, '
+                                   f'що додає йому естетичної привабливості та вишуканості. '
+                                   f'Цей {theme.lower()} є не тільки практичним предметом, '
+                                   f'але й відмінним елементом декору. '
+                                   f'Він виготовлений з високоякісних матеріалів і має привабливий вигляд.')
 
-            for i in range(n):
-                name = f'{theme} #{i + 1}'
-                price = round(random.uniform(100, 1000), 2)
-                length = random.uniform(50, 200)
-                stock = stock_distribution[i % len(stock_distribution)]
-                mini_description = f'Це {theme.lower()} з унікальним дизайном.'
-                description = (f'{name} - це високоякісний {theme.lower()} з унікальним дизайном. '
-                               f'Він виготовлений з вищого сорту дерева, '
-                               f'має розмір {length} см, що робить його ідеальним для зручного використання. '
-                               f'Цей {theme.lower()} виконаний з великою увагою до деталей, '
-                               f'що підкреслює його високу якість та унікальність. '
-                               f'Він виготовлений з високоякісних матеріалів, '
-                               f'що гарантують його довговічність та надійність. '
-                               f'Цей {theme.lower()} є відмінним доповненням до будь-якої колекції '
-                               f'або може слугувати прекрасним подарунком. '
-                               f'Він виготовлений з високоякісного дерева, '
-                               f'що додає йому естетичної привабливості та вишуканості. '
-                               f'Цей {theme.lower()} є не тільки практичним предметом, '
-                               f'але й відмінним елементом декору. '
-                               f'Він виготовлений з високоякісних матеріалів і має привабливий вигляд.')
+                    slug = f'{theme.lower()}-{i + 1}'
 
-                slug = f'{theme.lower()}-{i + 1}'
-
-                # Відкриваємо файл зображення
-                with open(f'apps/shop/management/img/sward.png', 'rb') as img_file:
-                    # Створюємо новий екземпляр моделі ItemModel
                     item = ItemModel(
                         name=name,
                         price=price,
@@ -114,30 +113,29 @@ class Command(BaseCommand):
                         description=description,
                         slug=slug,
                         category=category,
-                        mini_image=File(img_file),
+                        mini_image=image_file,
                         stars=random.randint(1, 6)
                     )
-
-                    # Зберігаємо об'єкт в базі даних
-                    item.save()
-
-                    # Додаємо три зображення до товару
-                    for _ in range(3):
-                        item_image = ItemImageModel(image=File(img_file), product_model=item)
-                        item_image.save()
-
-                    # Друкуємо повідомлення в консолі
+                    item_set.append(item)
                     print(f'Товар "{name}" було успішно згенеровано та збережено в базі даних.')
+                ItemModel.objects.bulk_create(item_set)
 
         stock_distribution = ['IN_STOCK'] * 75 + ['OUT_OF_STOCK'] * 25 + ['BACKORDER'] * 25 + ['SPECIFIC_ORDER'] * 25
 
         if len(ItemModel.objects.all()) >= 299:
             pass
         else:
-            with transaction.atomic():
-                categories = CategoryModel.objects.all()
-                for category in categories:
-                    generate_items(150, category.name, category.name, stock_distribution)
+            categories = CategoryModel.objects.all()
+            for category in categories:
+                generate_items(150, category.name, category.name, stock_distribution)
+
+    def item_images(self):
+        item_set = ItemModel.objects.all()
+        with open(f'apps/shop/management/img/sward.png', 'rb') as img_file:
+            image_file = File(img_file)
+            for item in item_set:
+                item_image = ItemImageModel(image=image_file, product_model=item)
+                item_image.save()
 
     def item_stats(self):
         def generate_item_stats():
@@ -164,8 +162,7 @@ class Command(BaseCommand):
 
                     print(f'Статистика для товару "{item.name}" була успішно згенерована та збережена в базі даних.')
 
-        with transaction.atomic():
-            generate_item_stats()
+        generate_item_stats()
 
     def review(self):
         def generate_review_data():
@@ -181,36 +178,35 @@ class Command(BaseCommand):
             # Get all items
             items = ItemModel.objects.all()
 
-            with transaction.atomic():
-                for item in items:
-                    # Generate a random number of reviews for each item
-                    for _ in range(random.randint(3, 30)):
-                        # Generate data
-                        email = f"{random.randint(1, 1000)}@example.com"
-                        first_name = "Ім'я" + str(random.randint(1, 100))
-                        last_name = "Прізвище" + str(random.randint(1, 100))
-                        state = random.choice(["pending", "visible", "invisible"])
-                        text = random.choice(ukrainian_texts)
-                        stars = random.randint(1, 5)
+            for item in items:
+                # Generate a random number of reviews for each item
+                for _ in range(random.randint(3, 30)):
+                    # Generate data
+                    email = f"{random.randint(1, 1000)}@example.com"
+                    first_name = "Ім'я" + str(random.randint(1, 100))
+                    last_name = "Прізвище" + str(random.randint(1, 100))
+                    state = random.choice(["pending", "visible", "invisible"])
+                    text = random.choice(ukrainian_texts)
+                    stars = random.randint(1, 5)
 
-                        # Generate a random date between 1 year ago and yesterday
-                        one_year_ago = timezone.now() - timedelta(days=365)
-                        yesterday = timezone.now() - timedelta(days=1)
-                        date = one_year_ago + (yesterday - one_year_ago) * random.random()
-                        updated_at = timezone.now()
+                    # Generate a random date between 1 year ago and yesterday
+                    one_year_ago = timezone.now() - timedelta(days=365)
+                    yesterday = timezone.now() - timedelta(days=1)
+                    date = one_year_ago + (yesterday - one_year_ago) * random.random()
+                    updated_at = timezone.now()
 
-                        # Create and save the review
-                        review = ReviewModel(
-                            item=item,
-                            email=email,
-                            first_name=first_name,
-                            last_name=last_name,
-                            state=state,
-                            text=text,
-                            date=date,
-                            updated_at=updated_at,
-                            stars=stars,
-                        )
-                        review.save()
+                    # Create and save the review
+                    review = ReviewModel(
+                        item=item,
+                        email=email,
+                        first_name=first_name,
+                        last_name=last_name,
+                        state=state,
+                        text=text,
+                        date=date,
+                        updated_at=updated_at,
+                        stars=stars,
+                    )
+                    review.save()
 
         generate_review_data()
