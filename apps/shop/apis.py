@@ -1,7 +1,7 @@
 from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 
 from .selectors import (
     CategorySelector,
@@ -17,10 +17,6 @@ from .models import (
     ItemModel,
     ItemImageModel,
     ReviewModel
-)
-from .serializers import (
-    CategoryImageSerializer,
-    ItemImageSerializer,
 )
 from .pagination import (
     get_paginated_response, LimitOffsetPagination
@@ -246,7 +242,6 @@ class ReviewListApi(APIView, ReviewSelector):
 
     class FilterSerializer(serializers.Serializer):
         order_by = serializers.CharField(default='stars')
-        item_id = serializers.IntegerField()
 
     class OutputSerializer(serializers.ModelSerializer):
         class Meta:
@@ -255,7 +250,9 @@ class ReviewListApi(APIView, ReviewSelector):
             fields = '__all__'
 
     @extend_schema(
-        responses={200: OutputSerializer()},
+        responses={200: OutputSerializer(),
+                   404: OpenApiResponse(description="Not found"),
+                   },
         parameters=[
             OpenApiParameter(
                 name='order_by',
@@ -278,21 +275,13 @@ class ReviewListApi(APIView, ReviewSelector):
                 description='page of objects',
                 required=False,
                 type=int
-            ),
-            OpenApiParameter(
-                name='item_id',
-                location=OpenApiParameter.QUERY,
-                description='Choose reviews with specific item',
-                required=True,
-                type=int
             )
         ],
     )
-    def get(self, request):
+    def get(self, request, item_slug):
         filters_serializer = self.FilterSerializer(data=request.query_params)
         filters_serializer.is_valid(raise_exception=True)
-        print(filters_serializer.validated_data)
-        reviews = self.review_list(filters=filters_serializer.validated_data)
+        reviews = self.review_list(filters=filters_serializer.validated_data, item_slug=item_slug)
 
         return get_paginated_response(
             pagination_class=self.Pagination,

@@ -1,4 +1,5 @@
 import django_filters
+from django.http import Http404
 
 from .models import (
     CategoryModel,
@@ -43,8 +44,10 @@ class ItemSelector:
 
 
 class ReviewSelector:
-    def review_list(self, filters=None):
+    def review_list(self, item_slug, filters=None):
         filters = filters or {}
-        queryset = ReviewModel.objects.all()
-
+        try:
+            queryset = ItemModel.objects.get(slug=item_slug).review_set
+        except ItemModel.DoesNotExist:
+            raise Http404()
         return ReviewFilter(filters, queryset).qs
