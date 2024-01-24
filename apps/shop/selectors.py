@@ -1,5 +1,5 @@
 import django_filters
-from django.http import Http404
+from rest_framework import exceptions
 
 from .models import (
     CategoryModel,
@@ -49,5 +49,5 @@ class ReviewSelector:
         try:
             queryset = ItemModel.objects.get(pk=item_id).review_set
         except ItemModel.DoesNotExist:
-            raise Http404()
+            raise exceptions.ValidationError({"detail": "Item not found"})
         return ReviewFilter(filters, queryset).qs

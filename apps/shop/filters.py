@@ -26,9 +26,10 @@ class ReviewFilter(django_filters.FilterSet):
     order_by = django_filters.OrderingFilter(
         # tuple mapping, ('model field name', 'parameter name')
         fields=(
-            ('stars', 'stars')
+            ("stars", "stars"),
+            ("date", "date")
         )
     )
     class Meta:
         model = ReviewModel
-        fields = ['item_id']
+        fields = ["item_id"]

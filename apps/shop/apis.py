@@ -26,6 +26,11 @@ from .utils import (
 )
 
 
+class ErrorSerializer(serializers.Serializer):
+    """For swagger representation."""
+    detail = serializers.CharField()
+
+
 class CategoryListApi(APIView, CategorySelector):
     class OutputSerializer(serializers.Serializer):
         id = serializers.IntegerField()
@@ -237,6 +242,7 @@ class ItemListApi(APIView, ItemSelector):
 
 
 class ReviewListApi(APIView, ReviewSelector):
+
     class Pagination(LimitOffsetPagination):
         default_limit = 10
 
@@ -251,16 +257,16 @@ class ReviewListApi(APIView, ReviewSelector):
 
     @extend_schema(
         responses={200: OutputSerializer(),
-                   404: OpenApiResponse(description="Not found"),
+                   404: ErrorSerializer(),
                    },
         parameters=[
             OpenApiParameter(
                 name='order_by',
                 location=OpenApiParameter.QUERY,
-                description='order by stars',
+                description='order by stars or date',
                 required=False,
                 type=str,
-                enum=('stars', '-stars')
+                enum=('stars', '-stars', "date", "-date")
             ),
             OpenApiParameter(
                 name='limit',
