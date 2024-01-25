@@ -8,5 +8,6 @@ urlpatterns = [
     path('api/admin/', admin.site.urls),
     path('api/shop/', include('apps.shop.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('', SpectacularSwaggerView.as_view(url_name='schema'))
+    path('api/schema/docs/', SpectacularSwaggerView.as_view(url_name='schema')),
+    path('', SpectacularSwaggerView.as_view())
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
