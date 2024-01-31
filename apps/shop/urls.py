@@ -18,11 +18,11 @@ contacts_urlpatterns = [
 
 items_urlpatterns = [
     path('', ItemListApi.as_view(), name='list'),
-    path('<str:item_slug>/', ItemRetrieveApi.as_view(), name='retrieve')
+    path('<str:item_slug>/', ItemRetrieveApi.as_view(), name='retrieve'),
+    path('<int:item_id>/reviews/', ReviewListApi.as_view(), name='list_item_reviews')
 ]
 
 reviews_urlpatterns = [
-    path('', ReviewListApi.as_view(), name='list')
 ]
 
 urlpatterns = [

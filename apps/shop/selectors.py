@@ -1,4 +1,5 @@
 import django_filters
+from rest_framework import exceptions
 
 from .models import (
     CategoryModel,
@@ -43,8 +44,10 @@ class ItemSelector:
 
 
 class ReviewSelector:
-    def review_list(self, filters=None):
+    def review_list(self, item_id, filters=None):
         filters = filters or {}
-        queryset = ReviewModel.objects.all()
-
+        try:
+            queryset = ItemModel.objects.get(pk=item_id).review_set
+        except ItemModel.DoesNotExist:
+            raise exceptions.ValidationError({"detail": "Item not found"})
         return ReviewFilter(filters, queryset).qs

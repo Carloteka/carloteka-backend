@@ -1,7 +1,7 @@
 from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 
 from .selectors import (
     CategorySelector,
@@ -18,16 +18,17 @@ from .models import (
     ItemImageModel,
     ReviewModel
 )
-from .serializers import (
-    CategoryImageSerializer,
-    ItemImageSerializer,
-)
 from .pagination import (
     get_paginated_response, LimitOffsetPagination
 )
 from .utils import (
     inline_serializer
 )
+
+
+class ErrorSerializer(serializers.Serializer):
+    """For swagger representation."""
+    detail = serializers.CharField()
 
 
 class CategoryListApi(APIView, CategorySelector):
@@ -241,12 +242,12 @@ class ItemListApi(APIView, ItemSelector):
 
 
 class ReviewListApi(APIView, ReviewSelector):
+
     class Pagination(LimitOffsetPagination):
         default_limit = 10
 
     class FilterSerializer(serializers.Serializer):
         order_by = serializers.CharField(default='stars')
-        item_id = serializers.IntegerField()
 
     class OutputSerializer(serializers.ModelSerializer):
         class Meta:
@@ -255,15 +256,17 @@ class ReviewListApi(APIView, ReviewSelector):
             fields = '__all__'
 
     @extend_schema(
-        responses={200: OutputSerializer()},
+        responses={200: OutputSerializer(),
+                   404: ErrorSerializer(),
+                   },
         parameters=[
             OpenApiParameter(
                 name='order_by',
                 location=OpenApiParameter.QUERY,
-                description='order by stars',
+                description='order by stars or date',
                 required=False,
                 type=str,
-                enum=('stars', '-stars')
+                enum=('stars', '-stars', "date", "-date")
             ),
             OpenApiParameter(
                 name='limit',
@@ -278,21 +281,13 @@ class ReviewListApi(APIView, ReviewSelector):
                 description='page of objects',
                 required=False,
                 type=int
-            ),
-            OpenApiParameter(
-                name='item_id',
-                location=OpenApiParameter.QUERY,
-                description='Choose reviews with specific item',
-                required=True,
-                type=int
             )
         ],
     )
-    def get(self, request):
+    def get(self, request, item_id):
         filters_serializer = self.FilterSerializer(data=request.query_params)
         filters_serializer.is_valid(raise_exception=True)
-        print(filters_serializer.validated_data)
-        reviews = self.review_list(filters=filters_serializer.validated_data)
+        reviews = self.review_list(filters=filters_serializer.validated_data, item_id=item_id)
 
         return get_paginated_response(
             pagination_class=self.Pagination,
