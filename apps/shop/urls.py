@@ -6,6 +6,8 @@ from .apis import (
     ItemListApi,
     ItemRetrieveApi,
     ReviewListApi,
+    OrderCreateAPI,
+    OrderRetrieveAPI,
 )
 
 categories_urlpatterns = [
@@ -25,9 +27,15 @@ items_urlpatterns = [
 reviews_urlpatterns = [
 ]
 
+orders_urlpatterns = [
+    path('<int:pk>/', OrderRetrieveAPI.as_view(), name='get_order'),
+    path('', OrderCreateAPI.as_view(), name='create_order')
+]
+
 urlpatterns = [
     path('categories/', include((categories_urlpatterns, 'categories'))),
     path('contacts/', include((contacts_urlpatterns, 'contacts'))),
     path('items/', include((items_urlpatterns, 'items'))),
     path('reviews/', include((reviews_urlpatterns, 'reviews'))),
+    path('orders/', include((orders_urlpatterns, 'orders'))),
 ]

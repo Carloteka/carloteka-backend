@@ -158,6 +158,9 @@ class OrderModel(models.Model):
     def __str__(self):
         return f'OrderModel {self.id} by {self.first_name} {self.last_name}'
 
+    def get_items(self):
+        return self.item_set.all()
+
 
 class OrderItemModel(models.Model):
     """Intermediate table for specifying the number of products."""
@@ -165,6 +168,9 @@ class OrderItemModel(models.Model):
     order = models.ForeignKey(OrderModel, on_delete=models.CASCADE)
     item = models.ForeignKey(ItemModel, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField("quantity product", default=0)
+
+    def __str__(self):
+        return f'{self.quantity} {self.item}'
 
 
 class ReviewModel(models.Model):
