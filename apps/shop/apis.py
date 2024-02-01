@@ -329,41 +329,23 @@ class OrderCreateAPI(APIView):
         order_create(**serializer.validated_data)
         return Response(status=status.HTTP_201_CREATED)
 
-class OutputItemsSerializer(serializers.Serializer):
-
-    id = serializers.IntegerField()
-    quantity = serializers.IntegerField()
-
 
 class OrderRetrieveAPI(APIView, OrderSelector):
     class OutputOrdersSerializer(serializers.ModelSerializer):
-        items = serializers.SerializerMethodField()
+        item_set = serializers.SerializerMethodField()
+
         class Meta:
             model = OrderModel
-            fields = [
-                "first_name",
-                "last_name",
-                "country",
-                "region",
-                "city",
-                "delivery_service",
-                "postoffice",
-                "postbox",
-                "payment_method",
-                "phone_number",
-                "email",
-                "comment",
-                "created_at",
-                "update_at",
-                "items",
-                "status",
-                "no_call_back",
-                'total_amount',
-            ]
+            fields = "__all__"
 
-        def get_items(self, obj):
+        class OutputOrderItemsSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = OrderItemModel
+                exclude = ["id", "order"]
+
+        def get_item_set(self, obj):
             items = obj.get_items()
-            serializer = OutputItemsSerializer(items, many=True,)
+            serializer = self.OutputOrderItemsSerializer(items, many=True)
             return serializer.data
 
     @extend_schema(

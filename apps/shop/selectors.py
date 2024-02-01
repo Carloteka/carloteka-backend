@@ -48,7 +48,7 @@ class ItemSelector:
         try:
             return ItemModel.objects.get(pk=item_id)
         except ItemModel.DoesNotExist:
-            raise exceptions.ValidationError({"detail": "Item not found"})
+            raise exceptions.NotFound({"detail": "Item not found"})
 
 
 class ReviewSelector:
@@ -65,4 +65,4 @@ class OrderSelector:
         try:
             return OrderModel.objects.get(pk=order_id)
         except OrderModel.DoesNotExist:
-            raise exceptions.ValidationError({"detail": "Order not found"})
+            raise exceptions.NotFound({"detail": "Order not found"})
