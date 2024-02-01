@@ -105,6 +105,7 @@ class ItemRetrieveApi(APIView, ItemSelector):
             ref_name = 'shop.ItemRetrieveOutputSerializer'
 
     @extend_schema(
+        tags=["Item"],
         responses={
             200: OutputSerializer(),
             404: {"detail": DEFAULT_404_EXCEPTION_DETAIL}
@@ -170,6 +171,7 @@ class ItemListApi(APIView, ItemSelector):
             ref_name = 'shop.ItemListOutputSerializer'
 
     @extend_schema(
+        tags=["Item"],
         responses={200: OutputSerializer()},
         parameters=[
             OpenApiParameter(
@@ -258,6 +260,7 @@ class ReviewListApi(APIView, ReviewSelector):
             fields = '__all__'
 
     @extend_schema(
+        tags=["Review"],
         responses={200: OutputSerializer(),
                    404: ErrorSerializer404()
                    },
@@ -316,6 +319,7 @@ class OrderCreateAPI(APIView):
             exclude = ["item_set"]
 
     @extend_schema(
+        tags=["Order"],
         request=InputOrdersSerializer,
         responses={
             201: status.HTTP_201_CREATED,
@@ -349,6 +353,7 @@ class OrderRetrieveAPI(APIView, OrderSelector):
             return serializer.data
 
     @extend_schema(
+        tags=["Order"],
         responses={
             200: OutputOrdersSerializer(),
             404: ErrorSerializer404(),
