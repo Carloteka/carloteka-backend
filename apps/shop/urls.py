@@ -28,8 +28,8 @@ reviews_urlpatterns = [
 ]
 
 orders_urlpatterns = [
-    path('<int:pk>/', OrderRetrieveAPI.as_view(), name='get_order'),
-    path('', OrderCreateAPI.as_view(), name='create_order')
+    path('<int:pk>/', OrderRetrieveAPI.as_view(), name='retrieve'),
+    path('create/', OrderCreateAPI.as_view(), name='create')
 ]
 
 urlpatterns = [
