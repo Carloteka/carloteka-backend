@@ -42,6 +42,14 @@ class ItemSelector:
 
         return queryset
 
+    def item_retrieve_by_id(self, item_id: int) -> ItemModel:
+        # TODO if object is visible - send; else - throw error 404 (in theory 403,
+        #  but user should not know that we have it)
+        try:
+            return ItemModel.objects.get(pk=item_id)
+        except ItemModel.DoesNotExist:
+            raise exceptions.NotFound({"detail": "Item not found"})
+
 
 class ReviewSelector:
     def review_list(self, item_id, filters=None):
@@ -51,3 +59,10 @@ class ReviewSelector:
         except ItemModel.DoesNotExist:
             raise exceptions.ValidationError({"detail": "Item not found"})
         return ReviewFilter(filters, queryset).qs
+
+class OrderSelector:
+    def get_order_by_id(self, order_id: int) -> OrderModel:
+        try:
+            return OrderModel.objects.get(pk=order_id)
+        except OrderModel.DoesNotExist:
+            raise exceptions.NotFound({"detail": "Order not found"})

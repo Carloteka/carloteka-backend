@@ -1,41 +1,34 @@
 from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from apps.core.exceptions import (
     DEFAULT_400_EXCEPTION_DETAIL,
     DEFAULT_401_EXCEPTION_DETAIL,
     DEFAULT_403_EXCEPTION_DETAIL,
     DEFAULT_404_EXCEPTION_DETAIL,
-    DEFAULT_429_EXCEPTION_DETAIL
+    DEFAULT_429_EXCEPTION_DETAIL,
+    ErrorSerializer404
 )
 
 from .selectors import (
     CategorySelector,
     ShopContactsSelector,
     ItemSelector,
-    ReviewSelector,
+    ReviewSelector, OrderSelector,
 )
 from .models import (
-    CategoryModel,
-    ShopContactsModel,
     OrderModel,
-    CategoryImageModel,
     ItemModel,
-    ItemImageModel,
-    ReviewModel
+    ReviewModel, OrderItemModel
 )
 from .pagination import (
     get_paginated_response, LimitOffsetPagination
 )
+from .servises import order_create, get_item_by_id
 from .utils import (
     inline_serializer
 )
-
-
-class ErrorSerializer(serializers.Serializer):
-    """For swagger representation."""
-    detail = serializers.CharField()
 
 
 class CategoryListApi(APIView, CategorySelector):
@@ -112,6 +105,7 @@ class ItemRetrieveApi(APIView, ItemSelector):
             ref_name = 'shop.ItemRetrieveOutputSerializer'
 
     @extend_schema(
+        tags=["Item"],
         responses={
             200: OutputSerializer(),
             404: {"detail": DEFAULT_404_EXCEPTION_DETAIL}
@@ -177,6 +171,7 @@ class ItemListApi(APIView, ItemSelector):
             ref_name = 'shop.ItemListOutputSerializer'
 
     @extend_schema(
+        tags=["Item"],
         responses={200: OutputSerializer()},
         parameters=[
             OpenApiParameter(
@@ -252,7 +247,6 @@ class ItemListApi(APIView, ItemSelector):
 
 
 class ReviewListApi(APIView, ReviewSelector):
-
     class Pagination(LimitOffsetPagination):
         default_limit = 10
 
@@ -266,8 +260,9 @@ class ReviewListApi(APIView, ReviewSelector):
             fields = '__all__'
 
     @extend_schema(
+        tags=["Review"],
         responses={200: OutputSerializer(),
-                   404: ErrorSerializer(),
+                   404: ErrorSerializer404()
                    },
         parameters=[
             OpenApiParameter(
@@ -306,3 +301,66 @@ class ReviewListApi(APIView, ReviewSelector):
             request=request,
             view=self
         )
+
+
+class OrderCreateAPI(APIView):
+    class InputOrdersSerializer(serializers.ModelSerializer):
+        items = inline_serializer(
+            name="items",
+            many=True,
+            fields={
+                "quantity": serializers.IntegerField(),
+                "item": serializers.IntegerField(),
+            },
+        )
+
+        class Meta:
+            model = OrderModel
+            exclude = ["item_set"]
+
+    @extend_schema(
+        tags=["Order"],
+        request=InputOrdersSerializer,
+        responses={
+            201: status.HTTP_201_CREATED,
+            404: ErrorSerializer404(),
+        },
+    )
+    def post(self, request):
+        """Create a new order."""
+        serializer = self.InputOrdersSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        order_create(**serializer.validated_data)
+        return Response(status=status.HTTP_201_CREATED)
+
+
+class OrderRetrieveAPI(APIView, OrderSelector):
+    class OutputOrdersSerializer(serializers.ModelSerializer):
+        item_set = serializers.SerializerMethodField()
+
+        class Meta:
+            model = OrderModel
+            fields = "__all__"
+
+        class OutputOrderItemsSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = OrderItemModel
+                exclude = ["id", "order"]
+
+        def get_item_set(self, obj):
+            items = obj.get_items()
+            serializer = self.OutputOrderItemsSerializer(items, many=True)
+            return serializer.data
+
+    @extend_schema(
+        tags=["Order"],
+        responses={
+            200: OutputOrdersSerializer(),
+            404: ErrorSerializer404(),
+        },
+    )
+    def get(self, request, pk):
+        """Retrieve an order."""
+        order = self.get_order_by_id(pk)
+        serializer = self.OutputOrdersSerializer(order, many=False)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)

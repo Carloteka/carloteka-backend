@@ -148,7 +148,7 @@ class OrderModel(models.Model):
     comment = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
-    item_set = models.ManyToManyField('ItemModel', through="OrderItemModel")
+    item_set = models.ManyToManyField(ItemModel, through="OrderItemModel")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     no_call_back = models.BooleanField(default=False, verbose_name="Не передзвонювати")
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -158,6 +158,10 @@ class OrderModel(models.Model):
     def __str__(self):
         return f'OrderModel {self.id} by {self.first_name} {self.last_name}'
 
+    def get_items(self):
+        """Return queryset with OrderItemModel instances."""
+        return OrderItemModel.objects.filter(order__id=self.id)
+
 
 class OrderItemModel(models.Model):
     """Intermediate table for specifying the number of products."""
@@ -165,6 +169,9 @@ class OrderItemModel(models.Model):
     order = models.ForeignKey(OrderModel, on_delete=models.CASCADE)
     item = models.ForeignKey(ItemModel, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField("quantity product", default=0)
+
+    def __str__(self) -> str:
+        return f"{self.quantity} x {self.item.name} in Order #{self.order.pk}"
 
 
 class ReviewModel(models.Model):
