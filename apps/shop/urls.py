@@ -9,6 +9,7 @@ from .apis import (
     OrderCreateAPI,
     OrderRetrieveAPI,
 )
+from .NP_apis import AreasAPI, SettlementsAPI, WarehousesAPI
 
 categories_urlpatterns = [
     path('', CategoryListApi.as_view(), name='list'),
@@ -31,6 +32,12 @@ orders_urlpatterns = [
     path('<int:pk>/', OrderRetrieveAPI.as_view(), name='retrieve'),
     path('create/', OrderCreateAPI.as_view(), name='create')
 ]
+np_urlpatterns = [
+    path('areas/', AreasAPI.as_view(), name='areas'),
+    path('settlements/', SettlementsAPI.as_view(), name='settlements'),
+    path('warehouses/', WarehousesAPI.as_view(), name='warehouses'),
+
+]
 
 urlpatterns = [
     path('categories/', include((categories_urlpatterns, 'categories'))),
@@ -38,4 +45,5 @@ urlpatterns = [
     path('items/', include((items_urlpatterns, 'items'))),
     path('reviews/', include((reviews_urlpatterns, 'reviews'))),
     path('orders/', include((orders_urlpatterns, 'orders'))),
+    path('np/', include((np_urlpatterns, 'np'))),
 ]
