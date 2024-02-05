@@ -10,7 +10,7 @@ def check_date(date: datetime, days: int) -> bool:
     """
     Checking the expiration date
     :param date: Datetime of creation information
-    :param days: expiration date in days
+    :param days: expiration date in days (after that days should update date)
     :return:
     """
     if date:
@@ -31,7 +31,6 @@ class NovaPoshtaClient:
         # to cache in memory
         self.areas = {"created_at": datetime(2000, 1, 1), "data": {}}
         self.settlements = {}
-        self.cities = {}
         self.warehouses = {}
 
     def send(
@@ -72,7 +71,6 @@ class NovaPoshtaClient:
         """
         if check_date(self.areas["created_at"], 30):
             return self.areas["data"]
-        print("send api request get_areas")
         self.areas["data"] = self.send("Address", "getSettlementAreas", {})["data"]
         self.areas["created_at"] = datetime.now()
         return self.areas["data"]
@@ -87,6 +85,7 @@ class NovaPoshtaClient:
         if area_ref in self.settlements:
             if check_date(self.settlements[area_ref]["created_at"], 30):
                 return self.settlements[area_ref]["data"]
+
         # create or update settlements in the cache
         # get first part of settlements
         method_properties = {
@@ -98,15 +97,17 @@ class NovaPoshtaClient:
         }
         data = self.send("Address", "getSettlements", method_properties)
 
-        self.settlements[area_ref] = {"created_at": datetime.now()}
-        self.settlements[area_ref]["data"] = data["data"]
         # calculate count iteration to get all settlements
         iterations = data["info"]["totalCount"] // 150
+        # get all date sending api requests
         for i in range(2, int(iterations) + 2):
             method_properties["Page"] = i
             data = self.send("Address", "getSettlements", method_properties)
             self.settlements[area_ref]["data"].extend(data["data"])
 
+        # save request to memory
+        self.settlements[area_ref] = {"created_at": datetime.now()}
+        self.settlements[area_ref]["data"] = data["data"]
         return self.settlements[area_ref]["data"]
 
     def get_warehouses(self, city_ref):
@@ -124,12 +125,14 @@ class NovaPoshtaClient:
         self.warehouses[city_ref]["data"] = data["data"]
         return self.warehouses[city_ref]["data"]
 
-    def getWarehouseTypes(self):
+    def _getWarehouseTypes(self):
+        """Not used"""
         method_properties = {}
         data = self.send("Address", "getWarehouseTypes", method_properties)
         return data["data"]
 
-    def get_cities(self, CityName: str) -> dict:  # for get_streets
+    def _get_cities(self, CityName: str) -> dict:  # for get_streets
+        """Not used"""
         """
         Return list of settlements in the Area for getting list get_street
         :param area_ref: Area identifier (REF)
@@ -141,14 +144,16 @@ class NovaPoshtaClient:
         data = self.send("Address", "searchSettlements", method_properties)
         return data
 
-    def get_streets(self, SettlementRef, StreetName):
+    def _get_streets(self, SettlementRef, StreetName):
+        """Not used"""
         method_properties = {
             "StreetName": StreetName,
             "SettlementRef": SettlementRef,
         }
         return self.send("Address", "searchSettlementStreets", method_properties)
 
-    def get_regions(self, area_ref):
+    def _get_regions(self, area_ref):
+        """Not used"""
         method_properties = {
             "AreaRef": area_ref,
         }
