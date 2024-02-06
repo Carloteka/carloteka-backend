@@ -1,12 +1,15 @@
-from django.conf import settings
+from os import getenv
+
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .np import NovaPoshtaClient
+from apps.core.exceptions import ErrorSerializer404
 
-NP_API_KEY = settings.NP_API_KEY
+
+NP_API_KEY = getenv('NP_API_KEY')  # api key for nova poshta
 np = NovaPoshtaClient(NP_API_KEY)
 
 
@@ -18,8 +21,11 @@ class AreasAPI(APIView):
 
     @extend_schema(
         tags=["NP"],
+        summary="Get list of all Areas",
+        description="Get list of all Areas (областей)",
         responses={
             200: OutputSerializer,
+            404: ErrorSerializer404,
         },
     )
     def get(self, request):
@@ -43,6 +49,8 @@ class SettlementsAPI(APIView):
 
     @extend_schema(
         tags=["NP"],
+        summary="Get list of Settlements",
+        description="Get the list of Ukrainian cities to which goods are delivered by the 'Nova Poshta' company.",
         parameters=[
             OpenApiParameter(
                 name="Ref",
@@ -61,6 +69,8 @@ class SettlementsAPI(APIView):
         ],
         responses={
             200: OutputSettlementsSerializer,
+            400: status.HTTP_400_BAD_REQUEST,
+            404: ErrorSerializer404,
         },
     )
     def get(self, request):
@@ -80,13 +90,15 @@ class WarehousesAPI(APIView):
     class InputSerializer(serializers.Serializer):
         SettlementRef = serializers.UUIDField()
 
-    class OutputSettlementsSerializer(serializers.Serializer):
+    class OutputWarehousesSerializer(serializers.Serializer):
         Ref = serializers.UUIDField()
         Description = serializers.CharField(max_length=255)
         Number = serializers.CharField(max_length=255, allow_blank=True)
 
     @extend_schema(
         tags=["NP"],
+        summary="Get list of warehouses in city",
+        description="Get list of all warehouses in city. Use Ref from '/api/shop/np/settlements/'. ",
         parameters=[
             OpenApiParameter(
                 name="SettlementRef",
@@ -97,7 +109,9 @@ class WarehousesAPI(APIView):
             ),
         ],
         responses={
-            200: OutputSettlementsSerializer,
+            200: OutputWarehousesSerializer,
+            400: status.HTTP_400_BAD_REQUEST,
+            404: ErrorSerializer404,
         },
     )
     def get(self, request):
@@ -106,6 +120,7 @@ class WarehousesAPI(APIView):
         settlement_ref = str(serializer.validated_data["SettlementRef"])
 
         warehouses = np.get_warehouses(settlement_ref)
-        output_serializer = self.OutputSettlementsSerializer(data=warehouses, many=True)
+        output_serializer = self.OutputWarehousesSerializer(data=warehouses, many=True)
         output_serializer.is_valid(raise_exception=True)
         return Response(output_serializer.validated_data)
+

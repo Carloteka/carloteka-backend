@@ -3,6 +3,8 @@ from pprint import pprint
 
 import httpx
 
+from rest_framework import exceptions
+
 HEADERS = {"Content-Type": "application/json"}
 
 
@@ -61,9 +63,10 @@ class NovaPoshtaClient:
         }
         with self.http_client() as _client:
             pprint(request)
-            response = _client.post(**request)
-        return response.json()
-
+            response = _client.post(**request).json()
+        if response["success"]:
+            return response
+        raise exceptions.NotFound({"detail": response["errors"]})
     def get_areas(self) -> dict:
         """
         Gets all the available areas
@@ -75,10 +78,11 @@ class NovaPoshtaClient:
         self.areas["created_at"] = datetime.now()
         return self.areas["data"]
 
-    def get_settlements(self, area_ref: str, name: str) -> dict:  # for get_warehouses
+    def get_settlements(self, area_ref: str, city_name: str) -> dict:  # for get_warehouses
         """
         Return list of settlements in the Area for getting list get_warehouses
-        :param area_ref: Area identifier (REF)
+        :param area_ref: Area identifier (REF) getting in get_areas
+        :param city_name: City name or part of it
         :return: list of settlements
         """
         # checking availability in the cache and returning settlements if the expiration date has not expired
@@ -90,7 +94,7 @@ class NovaPoshtaClient:
         # get first part of settlements
         method_properties = {
             "AreaRef": area_ref,
-            "FindByString": name,
+            "FindByString": city_name,
             "Warehouse": "1",
             "Limit": "150",
             "Page": 1,
@@ -110,29 +114,34 @@ class NovaPoshtaClient:
         self.settlements[area_ref]["data"] = data["data"]
         return self.settlements[area_ref]["data"]
 
-    def get_warehouses(self, city_ref):
-        if city_ref in self.warehouses:
-            if check_date(self.warehouses[city_ref]["created_at"], 1):
-                return self.warehouses[city_ref]["data"]
+    def get_warehouses(self, settlement_ref: str) -> dict:
+        """
+        Get warehouse list in the city
+        :param settlement_ref: Settlement identifier (REF) getting in get_areas
+        :return:
+        """
+        if settlement_ref in self.warehouses:
+            if check_date(self.warehouses[settlement_ref]["created_at"], 1):
+                return self.warehouses[settlement_ref]["data"]
         method_properties = {
-            "SettlementRef": city_ref,
+            "SettlementRef": settlement_ref,
             "Limit": "500",
             "TypeOfWarehouseRef": "841339c7-591a-42e2-8233-7a0a00f0ed6f",
             "Page": 1,
         }
         data = self.send("Address", "getWarehouses", method_properties)
-        self.warehouses[city_ref] = {"created_at": datetime.now()}
-        self.warehouses[city_ref]["data"] = data["data"]
-        return self.warehouses[city_ref]["data"]
+        self.warehouses[settlement_ref] = {"created_at": datetime.now()}
+        self.warehouses[settlement_ref]["data"] = data["data"]
+        return self.warehouses[settlement_ref]["data"]
 
-    def _getWarehouseTypes(self):
-        """Not used"""
+    def _get_warehouse_types(self):
+        """Not used but may be needed"""
         method_properties = {}
         data = self.send("Address", "getWarehouseTypes", method_properties)
         return data["data"]
 
-    def _get_cities(self, CityName: str) -> dict:  # for get_streets
-        """Not used"""
+    def _get_cities(self, city_name: str) -> dict:  # for get_streets
+        """Not used but may be needed"""
         """
         Return list of settlements in the Area for getting list get_street
         :param area_ref: Area identifier (REF)
@@ -140,20 +149,20 @@ class NovaPoshtaClient:
         """
         # checking availability in the cache and returning settlements if the expiration date has not expired
 
-        method_properties = {"CityName": CityName, "Limit": "50", "Page": 1}
+        method_properties = {"CityName": city_name, "Limit": "50", "Page": 1}
         data = self.send("Address", "searchSettlements", method_properties)
         return data
 
-    def _get_streets(self, SettlementRef, StreetName):
-        """Not used"""
+    def _get_streets(self, settlement_ref, street_name):
+        """Not used but may be needed"""
         method_properties = {
-            "StreetName": StreetName,
-            "SettlementRef": SettlementRef,
+            "StreetName": street_name,
+            "SettlementRef": settlement_ref,
         }
         return self.send("Address", "searchSettlementStreets", method_properties)
 
     def _get_regions(self, area_ref):
-        """Not used"""
+        """Not used but may be needed"""
         method_properties = {
             "AreaRef": area_ref,
         }
