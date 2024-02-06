@@ -8,6 +8,7 @@ from .apis import (
     ReviewListApi,
     OrderCreateAPI,
     OrderRetrieveAPI,
+    ReviewCreateApi,
 )
 from .apis_nova_post import AreasAPI, SettlementsAPI, WarehousesAPI
 
@@ -20,7 +21,8 @@ contacts_urlpatterns = [
 items_urlpatterns = [
     path('', ItemListApi.as_view(), name='list'),
     path('<str:item_slug>/', ItemRetrieveApi.as_view(), name='retrieve'),
-    path('<int:item_id>/reviews/', ReviewListApi.as_view(), name='list_item_reviews')
+    path('<int:item_id>/reviews/', ReviewListApi.as_view(), name='list_item_reviews'),
+    path('<int:item_id>/reviews/create/', ReviewCreateApi.as_view(), name='create_item_reviews'),
 ]
 reviews_urlpatterns = [
 ]

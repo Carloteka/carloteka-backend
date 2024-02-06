@@ -1,4 +1,4 @@
-from apps.shop.models import OrderModel, OrderItemModel, ItemModel
+from apps.shop.models import OrderModel, OrderItemModel, ItemModel, ReviewModel
 from rest_framework import exceptions
 
 
@@ -18,7 +18,7 @@ def get_order_by_id(item_id):
     return order
 
 
-def order_create(*args, **kwargs):
+def order_create(*args, **kwargs) -> OrderModel:
     items = kwargs.pop("items")
     obj = OrderModel(**kwargs)
     obj.full_clean()
@@ -29,3 +29,11 @@ def order_create(*args, **kwargs):
         quantity = item.get("quantity")
         OrderItemModel(order=obj, item=item_obj, quantity=quantity).save()
     return obj
+
+
+def review_create(item_id: int, **kwargs) -> ReviewModel:
+    item = get_item_by_id(item_id=item_id)
+    review_obj = ReviewModel(item=item, **kwargs)
+    review_obj.full_clean()
+    review_obj.save()
+    return review_obj

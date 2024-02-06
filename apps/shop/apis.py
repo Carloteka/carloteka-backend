@@ -25,7 +25,7 @@ from .models import (
 from .pagination import (
     get_paginated_response, LimitOffsetPagination
 )
-from .servises import order_create, get_item_by_id
+from .servises import order_create, review_create
 from .utils import (
     inline_serializer
 )
@@ -303,6 +303,33 @@ class ReviewListApi(APIView, ReviewSelector):
         )
 
 
+class ReviewCreateApi(APIView):
+    class InputReviewCreateSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = ReviewModel
+            fields = (
+                "email",
+                "first_name",
+                "last_name",
+                "text",
+                "stars"
+            )
+    @extend_schema(
+        tags=["Review"],
+        summary="Create a review",
+        request=InputReviewCreateSerializer,
+        responses={201: status.HTTP_201_CREATED,
+                   404: ErrorSerializer404(),
+                   },
+    )
+    def post(self, request, item_id):
+        serializer = self.InputReviewCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        reviews = review_create(item_id=item_id, **serializer.validated_data)
+
+        return Response(status=status.HTTP_201_CREATED, data={"review_id": reviews.id})
+
+
 class OrderCreateAPI(APIView):
     class InputOrdersSerializer(serializers.ModelSerializer):
         items = inline_serializer(
@@ -330,8 +357,8 @@ class OrderCreateAPI(APIView):
         """Create a new order."""
         serializer = self.InputOrdersSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        order_create(**serializer.validated_data)
-        return Response(status=status.HTTP_201_CREATED)
+        order = order_create(**serializer.validated_data)
+        return Response(status=status.HTTP_201_CREATED, data={"order_id": order.id})
 
 
 class OrderRetrieveAPI(APIView, OrderSelector):
@@ -364,3 +391,4 @@ class OrderRetrieveAPI(APIView, OrderSelector):
         order = self.get_order_by_id(pk)
         serializer = self.OutputOrdersSerializer(order, many=False)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
