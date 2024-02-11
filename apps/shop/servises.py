@@ -1,5 +1,7 @@
-from apps.shop.models import OrderModel, OrderItemModel, ItemModel, ReviewModel
+from django.db import connection
 from rest_framework import exceptions
+
+from apps.shop.models import ItemModel, OrderItemModel, OrderModel, ReviewModel
 
 
 def get_item_by_id(item_id):
@@ -33,6 +35,22 @@ def order_create(*args, **kwargs) -> OrderModel:
 
 def review_create(item_id: int, **kwargs) -> ReviewModel:
     item = get_item_by_id(item_id=item_id)
+    user_email = kwargs.get("email")
+
+    # Checking the ability to leave a review
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT DISTINCT item_id  "
+            "FROM shop_ordermodel "
+            "JOIN shop_orderitemmodel ON shop_ordermodel.id = shop_orderitemmodel.order_id "
+            f"WHERE shop_ordermodel.email = '{user_email}';"
+        )
+        available_items = [i[0] for i in cursor.fetchall()]  # list of item_id for which the user can leave a review
+    if item.id not in available_items:
+        raise exceptions.ValidationError(
+            {"detail": "The user did not buy this product"}
+        )
+
     review_obj = ReviewModel(item=item, **kwargs)
     review_obj.full_clean()
     review_obj.save()
