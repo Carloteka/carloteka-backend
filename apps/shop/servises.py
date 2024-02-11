@@ -1,5 +1,8 @@
-from apps.shop.models import OrderModel, OrderItemModel, ItemModel, ReviewModel
+from decimal import Decimal
+
 from rest_framework import exceptions
+
+from apps.shop.models import ItemModel, OrderItemModel, OrderModel, ReviewModel
 
 
 def get_item_by_id(item_id):
@@ -20,6 +23,20 @@ def get_order_by_id(item_id):
 
 def order_create(*args, **kwargs) -> OrderModel:
     items = kwargs.pop("items")
+    # calculating the actual sum of prices of goods multiplied by quantity
+    sum_amount = Decimal(
+        sum(
+            [
+                (item.get("quantity") * get_item_by_id(item.get("item")).price)
+                for item in items
+            ]
+        )
+    ).quantize(Decimal("1.00"))
+    # checking the correspondence of the received and fictitiously defended amount
+    if sum_amount != kwargs.get("total_amount"):
+        raise exceptions.ValidationError(
+            {"total_amount": f"Total amount is not correct. Should be {sum_amount}"}
+        )
     obj = OrderModel(**kwargs)
     obj.full_clean()
     obj.save()

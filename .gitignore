@@ -6,3 +6,4 @@ images
 .env
 venv
 db.sqlite3
+/apps/shop/Untitled.ipynb
