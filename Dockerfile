@@ -9,7 +9,7 @@ RUN mkdir -p /code
 WORKDIR /code
 COPY . /code
 RUN rm -f db.sqlite3
-RUN cp .env-example .env --remove-destination
+RUN cp .env-example .env
 RUN set -ex && \
     pip install --upgrade pip && \
     pip install -r requirements.txt && \
