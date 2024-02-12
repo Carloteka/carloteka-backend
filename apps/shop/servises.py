@@ -47,7 +47,7 @@ def review_create(item_id: int, **kwargs) -> ReviewModel:
         )
         available_items = [i[0] for i in cursor.fetchall()]  # list of item_id for which the user can leave a review
     if item.id not in available_items:
-        raise exceptions.ValidationError(
+        raise exceptions.PermissionDenied(
             {"detail": "The user did not buy this product"}
         )
 
