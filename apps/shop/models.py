@@ -1,6 +1,7 @@
 import os
 from io import BytesIO
 
+from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from django.core.files import File
 from django.db import models
@@ -154,6 +155,10 @@ class OrderModel(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     # TODO add clear_all (look in styleguide)
+    def clean_fields(self, exclude=None):
+        if self.delivery_service == 'nova_post':
+            if not self.postoffice or not self.country or not self.region or not self.city:
+                raise ValidationError("In order must be: country, region, city, postoffice")
 
     def __str__(self):
         return f'OrderModel {self.id} by {self.first_name} {self.last_name}'
@@ -191,6 +196,12 @@ class ReviewModel(models.Model):
     stars = models.IntegerField(
         "stars", choices=[(i, i) for i in range(1, 6)], blank=True, null=True
     )
+
+    def clean_fields(self, exclude=None):
+        if len(self.first_name) < 2:
+            raise ValidationError("First_name must be longer than 2")
+        if len(self.first_name) < 2:
+            raise ValidationError("First_name must be longer than 2")
 
     def __str__(self):
         return f"Review ID: {self.id} by {self.first_name} {self.last_name}"
