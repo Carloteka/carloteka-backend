@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from pprint import pprint
 
 import httpx
-
 from rest_framework import exceptions
 
 HEADERS = {"Content-Type": "application/json"}
@@ -67,6 +66,7 @@ class NovaPoshtaClient:
         if response["success"]:
             return response
         raise exceptions.NotFound({"detail": response["errors"]})
+
     def get_areas(self) -> dict:
         """
         Gets all the available areas
@@ -78,7 +78,9 @@ class NovaPoshtaClient:
         self.areas["created_at"] = datetime.now()
         return self.areas["data"]
 
-    def get_settlements(self, area_ref: str, city_name: str) -> dict:  # for get_warehouses
+    def get_settlements(
+        self, area_ref: str, city_name: str | None = None
+    ) -> list:  # for get_warehouses
         """
         Return list of settlements in the Area for getting list get_warehouses
         :param area_ref: Area identifier (REF) getting in get_areas
@@ -86,7 +88,7 @@ class NovaPoshtaClient:
         :return: list of settlements
         """
         # checking availability in the cache and returning settlements if the expiration date has not expired
-        if area_ref in self.settlements:
+        if area_ref in self.settlements and not city_name:
             if check_date(self.settlements[area_ref]["created_at"], 30):
                 return self.settlements[area_ref]["data"]
 
@@ -100,19 +102,21 @@ class NovaPoshtaClient:
             "Page": 1,
         }
         data = self.send("Address", "getSettlements", method_properties)
+        _settlements: list = data["data"]
 
         # calculate count iteration to get all settlements
         iterations = data["info"]["totalCount"] // 150
-        # get all date sending api requests
+        # get all date sending api requests if count of settlements > 150
         for i in range(2, int(iterations) + 2):
             method_properties["Page"] = i
             data = self.send("Address", "getSettlements", method_properties)
-            self.settlements[area_ref]["data"].extend(data["data"])
+            _settlements.extend(data["data"])
 
-        # save request to memory
-        self.settlements[area_ref] = {"created_at": datetime.now()}
-        self.settlements[area_ref]["data"] = data["data"]
-        return self.settlements[area_ref]["data"]
+        if not city_name:
+            # save request to memory
+            self.settlements[area_ref] = {"created_at": datetime.now()}
+            self.settlements[area_ref]["data"] = _settlements
+        return _settlements
 
     def get_warehouses(self, settlement_ref: str) -> dict:
         """
