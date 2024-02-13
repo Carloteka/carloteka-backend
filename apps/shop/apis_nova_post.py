@@ -38,7 +38,7 @@ class AreasAPI(APIView):
 class SettlementsAPI(APIView):
     class InputSerializer(serializers.Serializer):
         Ref = serializers.UUIDField()
-        city_name = serializers.CharField(max_length=255)
+        city_name = serializers.CharField(max_length=255, required=False)
 
     class OutputSettlementsSerializer(serializers.Serializer):
         Ref = serializers.UUIDField()
@@ -63,7 +63,7 @@ class SettlementsAPI(APIView):
                 name="city_name",
                 location=OpenApiParameter.QUERY,
                 description="City name",
-                required=True,
+                required=False,
                 type=str,
             ),
         ],
@@ -77,7 +77,7 @@ class SettlementsAPI(APIView):
         serializer = self.InputSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
         area_ref = str(serializer.validated_data["Ref"])
-        city_name = serializer.validated_data["city_name"]
+        city_name = serializer.validated_data.get("city_name")
         settlements = np.get_settlements(area_ref, city_name)
         output_serializer = self.OutputSettlementsSerializer(
             data=settlements, many=True
