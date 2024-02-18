@@ -34,6 +34,43 @@ class NovaPoshtaClient:
         self.settlements = {}
         self.warehouses = {}
 
+        self.sender_address = ""  # Ref Ідентифікатор відділення
+        self.sender_warehouse_index = ""  # WarehouseIndex
+        self.sender_phone = ""
+        self.recipient = ""
+        self.sender = ""
+        self.contact_sender = ""
+
+    def fill_info_about_sender(
+        self,
+        sender_address="731a002c-3ed2-11e6-a9f2-005056887b8d",
+        sender_warehouse_index="11/12",
+    ):
+        """
+        Fills in the necessary information to create an InternetDocument
+        :param sender_address:  Ref Ідентифікатор відділення
+        :param sender_warehouse_index: Цифрова адреса складу НП, де дані до слеша - це індекс населеного пункту,
+                                        а після номер відділення/поштомату
+        :return: None
+        """
+        self.sender_address = str(sender_address)
+        self.sender_warehouse_index = sender_warehouse_index
+
+        properties = {"CounterpartyProperty": "Sender", "Page": "1"}
+        sender = self.send("Counterparty", "getCounterparties", properties)
+        self.sender = sender["data"][0]["Ref"]
+
+        properties = {"CounterpartyProperty": "Recipient"}
+        recipient = self.send("Counterparty", "getCounterparties", properties)
+        self.recipient = recipient["data"][0]["Ref"]
+
+        properties = {"Ref": self.sender, "Page": "1"}
+        contact_sender = self.send(
+            "Counterparty", "getCounterpartyContactPersons", properties
+        )
+        self.contact_sender = contact_sender["data"][0]["Ref"]
+        self.sender_phone = contact_sender["data"][0]["Phones"]
+
     def send(
         self,
         model_name: str,
@@ -118,7 +155,7 @@ class NovaPoshtaClient:
             self.settlements[area_ref]["data"] = _settlements
         return _settlements
 
-    def get_warehouses(self, settlement_ref: str) -> dict:
+    def get_warehouses(self, settlement_ref: str) -> list:
         """
         Get warehouse list in the city
         :param settlement_ref: Settlement identifier (REF) getting in get_areas
@@ -127,16 +164,110 @@ class NovaPoshtaClient:
         if settlement_ref in self.warehouses:
             if check_date(self.warehouses[settlement_ref]["created_at"], 1):
                 return self.warehouses[settlement_ref]["data"]
+
+        # Поштове відділення
         method_properties = {
             "SettlementRef": settlement_ref,
             "Limit": "500",
-            "TypeOfWarehouseRef": "841339c7-591a-42e2-8233-7a0a00f0ed6f",
+            "TypeOfWarehouseRef": "841339c7-591a-42e2-8233-7a0a00f0ed6f",  # Поштове відділення
             "Page": 1,
         }
-        data = self.send("Address", "getWarehouses", method_properties)
+        data_post: dict = self.send("Address", "getWarehouses", method_properties)
+        # Вантажне відділення
+        method_properties = {
+            "SettlementRef": settlement_ref,
+            "Limit": "500",
+            "TypeOfWarehouseRef": "9a68df70-0267-42a8-bb5c-37f427e36ee4",  # Вантажне відділення
+            "Page": 1,
+        }
+
+        data_cargo: dict = self.send("Address", "getWarehouses", method_properties)
+        data: list = data_post["data"] + data_cargo["data"]
         self.warehouses[settlement_ref] = {"created_at": datetime.now()}
-        self.warehouses[settlement_ref]["data"] = data["data"]
+        self.warehouses[settlement_ref]["data"] = data
         return self.warehouses[settlement_ref]["data"]
+
+    def create_contact(
+        self, first_name: str, middle_name: str, last_name: str, phone: str, email: str
+    ) -> dict:
+        """
+        Create a new contact to send a package
+
+        :return: dict with Ref and other contact information
+        """
+        method_properties = {
+            "FirstName": first_name.capitalize(),
+            "MiddleName": middle_name.capitalize(),
+            "LastName": last_name.capitalize(),
+            "Phone": str(phone),
+            "Email": email,
+            "CounterpartyType": "PrivatePerson",
+            "CounterpartyProperty": "Recipient",
+        }
+        data = self.send("Counterparty", "save", method_properties)
+
+        return data["data"][0]["ContactPerson"]["data"][0]
+
+    def list_contacts(self):
+        method_properties = {"Ref": "4188a0a8-1e1c-11e9-8b24-005056881c6b", "Page": "1"}
+        data = self.send(
+            "Counterparty", "getCounterpartyContactPersons", method_properties
+        )
+        return data["data"]
+
+    def create_waybill(
+        self,
+        description,
+        cost,
+        volume_general,
+        weight,
+        recipient_contact,
+        recipient_address,
+        recipient_warehouse_index,
+        recipient_phone,
+    ):
+        """
+        Create Express-Waybill.
+
+        :param description: description of the cargo
+        :param cost: The cost of the cargo in UAH
+        :param volume_general: Cargo volume in m^3
+        :param weight: Cargo weight
+        :param recipient_contact: Ref receiver from create_contact
+        :param recipient_address: Ref warehouse from get_warehouses
+        :param recipient_warehouse_index: index warehouse from get_warehouses
+        :param recipient_phone: phone number receiver
+        :return:
+        """
+        if not self.sender:
+            self.fill_info_about_sender()  # fills sender attribute
+
+        method_properties = {
+            "Description": description,
+            "Cost": str(cost),
+            "VolumeGeneral": str(volume_general),
+            "Weight": str(weight),
+            "DateTime": (datetime.now() + timedelta(days=1)).strftime(
+                "%d.%m.%Y"
+            ),  # "18.02.2024",
+            "PayerType": "Recipient",
+            "PaymentMethod": "Cash",
+            "CargoType": "Parcel",
+            "ServiceType": "WarehouseWarehouse",
+            "SeatsAmount": "1",
+            "Sender": self.sender,
+            "SenderAddress": self.sender_address,
+            "SenderWarehouseIndex": recipient_warehouse_index,
+            "ContactSender": self.contact_sender,
+            "SendersPhone": self.sender_phone,
+            "Recipient": self.recipient,
+            "RecipientAddress": str(recipient_address),
+            "RecipientWarehouseIndex": recipient_warehouse_index,
+            "ContactRecipient": str(recipient_contact),
+            "RecipientsPhone": recipient_phone,
+        }
+        data = self.send("InternetDocument", "save", method_properties)
+        return data["data"][0]
 
     def _get_warehouse_types(self):
         """Not used but may be needed"""
@@ -171,6 +302,7 @@ class NovaPoshtaClient:
             "AreaRef": area_ref,
         }
         return self.send("Address", "getSettlementCountryRegion", method_properties)
+
 
 """
 base_url = "https://api-stage.novapost.pl/v.1.0/"
