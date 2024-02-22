@@ -4,6 +4,8 @@ from pprint import pprint
 import httpx
 from rest_framework import exceptions
 
+from apps.shop.models import ShopContactsModel
+
 HEADERS = {"Content-Type": "application/json"}
 
 
@@ -43,8 +45,8 @@ class NovaPoshtaClient:
 
     def fill_info_about_sender(
         self,
-        sender_address="731a002c-3ed2-11e6-a9f2-005056887b8d",
-        sender_warehouse_index="11/12",
+        sender_address=None,
+        sender_warehouse_index=None,
     ):
         """
         Fills in the necessary information to create an InternetDocument
@@ -53,8 +55,24 @@ class NovaPoshtaClient:
                                         а після номер відділення/поштомату
         :return: None
         """
-        self.sender_address = str(sender_address)
-        self.sender_warehouse_index = sender_warehouse_index
+        contacts = ShopContactsModel.objects.all().first()
+
+        if sender_address:
+            contacts.sender_address = sender_address
+            contacts.save()
+        if sender_warehouse_index:
+            contacts.sender_warehouse_index = sender_warehouse_index
+            contacts.save()
+
+        # if address is in DB - using it, else using default address to avoid errors
+        if contacts.sender_address:
+            self.sender_address = str(contacts.sender_address)
+        else:
+            self.sender_address = "731a002c-3ed2-11e6-a9f2-005056887b8d"
+        if contacts.sender_warehouse_index:
+            self.sender_warehouse_index = str(contacts.sender_warehouse_index)
+        else:
+            self.sender_warehouse_index = "11/12"
 
         properties = {"CounterpartyProperty": "Sender", "Page": "1"}
         sender = self.send("Counterparty", "getCounterparties", properties)
@@ -257,7 +275,7 @@ class NovaPoshtaClient:
             "SeatsAmount": "1",
             "Sender": self.sender,
             "SenderAddress": self.sender_address,
-            "SenderWarehouseIndex": recipient_warehouse_index,
+            "SenderWarehouseIndex": self.sender_warehouse_index,
             "ContactSender": self.contact_sender,
             "SendersPhone": self.sender_phone,
             "Recipient": self.recipient,

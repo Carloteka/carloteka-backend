@@ -112,6 +112,10 @@ class ShopContactsModel(models.Model):
     email = models.CharField(max_length=100)
     viber_link = models.CharField(max_length=100)
     telegram_link = models.CharField(max_length=100)
+    # for Nova Post contacts
+    sender_address = models.UUIDField(null=True, blank=True)
+    sender_warehouse_index = models.CharField(max_length=100, null=True, blank=True)
+
 
 
 User = get_user_model()
