@@ -219,13 +219,20 @@ class CreateWaybillAPI(APIView):
                 )
             return recipient_phone
 
+    class OutputCreateWaybillSerializer(serializers.Serializer):
+        IntDocNumber = serializers.IntegerField(min_value=1)
+        CostOnSite = serializers.IntegerField()
+        EstimatedDeliveryDate = serializers.DateField(format="%d.%m.%Y")
+        Ref = serializers.UUIDField()
+
+
     @extend_schema(
         tags=["NP"],
         summary="Create waybill",
         description="create waybill. volume_general - Об'єм вантажу в м^3, weight - Вага вантажу",
         request=InputCreateWaybillSerializer,
         responses={
-            # 201: OutputCreateContactSerializer,
+            201: OutputCreateWaybillSerializer,
             400: status.HTTP_400_BAD_REQUEST,
             404: ErrorSerializer404,
         },

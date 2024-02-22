@@ -20,7 +20,7 @@ from .selectors import (
 from .models import (
     OrderModel,
     ItemModel,
-    ReviewModel, OrderItemModel
+    ReviewModel, OrderItemModel, NovaPost
 )
 from .pagination import (
     get_paginated_response, LimitOffsetPagination
@@ -314,6 +314,7 @@ class ReviewCreateApi(APIView):
                 "text",
                 "stars"
             )
+
     @extend_schema(
         tags=["Review"],
         summary="Create a review",
@@ -340,10 +341,21 @@ class OrderCreateAPI(APIView):
                 "item": serializers.IntegerField(),
             },
         )
+        waybill_np = inline_serializer(
+            name="waybill_np",
+            many=False,
+            required=False,
+            fields={
+                "ref": serializers.UUIDField(),
+                "int_doc_number": serializers.IntegerField(),
+                "cost_on_site": serializers.IntegerField(),
+                "estimated_delivery_date": serializers.DateField()
+            }
+        )
 
         class Meta:
             model = OrderModel
-            exclude = ["item_set"]
+            exclude = ["item_set", "nova_post"]
 
     @extend_schema(
         tags=["Order"],
@@ -362,33 +374,70 @@ class OrderCreateAPI(APIView):
 
 
 class OrderRetrieveAPI(APIView, OrderSelector):
-    class OutputOrdersSerializer(serializers.ModelSerializer):
+    class OrdersSerializer(serializers.ModelSerializer):
         item_set = serializers.SerializerMethodField()
+        nova_post = serializers.SerializerMethodField()
 
         class Meta:
             model = OrderModel
             fields = "__all__"
 
-        class OutputOrderItemsSerializer(serializers.ModelSerializer):
+        class OrderItemsSerializer(serializers.ModelSerializer):
             class Meta:
                 model = OrderItemModel
                 exclude = ["id", "order"]
 
-        def get_item_set(self, obj):
+        def get_item_set(self, obj) -> dict:
             items = obj.get_items()
-            serializer = self.OutputOrderItemsSerializer(items, many=True)
+            serializer = self.OrderItemsSerializer(items, many=True)
             return serializer.data
+
+        class NovaPostSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = NovaPost
+                fields = "__all__"
+
+        def get_nova_post(self, obj) -> dict:
+            nova_post = obj.nova_post
+            serializer = self.NovaPostSerializer(nova_post)
+            return serializer.data
+
+    class OutputOrdersSerializer(serializers.ModelSerializer):
+        """For swagger represents."""
+        class Meta:
+            model = OrderModel
+            fields = "__all__"
+
+        nova_post = inline_serializer(
+            name="waybill_np_retrieve",
+            many=False,
+            required=False,
+            fields={
+                "ref": serializers.UUIDField(),
+                "int_doc_number": serializers.IntegerField(),
+                "cost_on_site": serializers.IntegerField(),
+                "estimated_delivery_date": serializers.DateField()
+            }
+        )
+
+        items = inline_serializer(
+            name="items_retrieve",
+            many=True,
+            fields={
+                "quantity": serializers.IntegerField(),
+                "item": serializers.IntegerField(),
+            },
+        )
 
     @extend_schema(
         tags=["Order"],
         responses={
-            200: OutputOrdersSerializer(),
+            200: OutputOrdersSerializer,
             404: ErrorSerializer404(),
         },
     )
     def get(self, request, pk):
         """Retrieve an order."""
         order = self.get_order_by_id(pk)
-        serializer = self.OutputOrdersSerializer(order, many=False)
+        serializer = self.OrdersSerializer(order, many=False)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
-

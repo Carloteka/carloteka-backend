@@ -1,4 +1,5 @@
 import os
+import uuid
 from io import BytesIO
 
 from django.core.exceptions import ValidationError
@@ -116,6 +117,15 @@ class ShopContactsModel(models.Model):
 User = get_user_model()
 
 
+class NovaPost(models.Model):
+    """For express-waybill nova_post model."""
+
+    ref = models.UUIDField(primary_key=True, editable=False, unique=True)
+    int_doc_number = models.CharField(max_length=20)
+    cost_on_site = models.DecimalField(max_digits=5, decimal_places=2)
+    estimated_delivery_date = models.DateField()
+
+
 class OrderModel(models.Model):
     STATUS_CHOICES = [
         ('new', 'Нове замовлення'),
@@ -153,6 +163,8 @@ class OrderModel(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     no_call_back = models.BooleanField(default=False, verbose_name="Не передзвонювати")
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    nova_post = models.OneToOneField(NovaPost, related_name='nova_post', on_delete=models.CASCADE,
+                                     null=True, blank=True, default=None)
 
     # TODO add clear_all (look in styleguide)
     def clean_fields(self, exclude=None):
