@@ -71,6 +71,8 @@ class ShopContactsRetrieveApi(APIView, ShopContactsSelector):
             ref_name = 'shop.ShopContactsRetrieveOutputSerializer'
 
     @extend_schema(
+        summary="Get object with contact details.",
+        description="Get object with contact details.",
         responses={200: OutputSerializer()}
     )
     def get(self, request):
