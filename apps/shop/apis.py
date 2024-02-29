@@ -71,6 +71,7 @@ class ShopContactsRetrieveApi(APIView, ShopContactsSelector):
             ref_name = 'shop.ShopContactsRetrieveOutputSerializer'
 
     @extend_schema(
+        tags=["Info"],
         summary="Get object with contact details.",
         description="Get object with contact details.",
         responses={200: OutputSerializer()}
