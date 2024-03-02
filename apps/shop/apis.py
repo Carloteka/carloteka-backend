@@ -45,7 +45,10 @@ class CategoryListApi(APIView, CategorySelector):
             ref_name = 'shop.CategoryListOutputSerializer'
 
     @extend_schema(
-        responses={200: OutputSerializer()}
+        tags=["Category"],
+        summary="Get list of all categories.",
+        description="Get list of all categories.",
+        responses={200: OutputSerializer()},
     )
     def get(self, request):
         queryset = self.category_list(params=request.query_params)
@@ -68,6 +71,9 @@ class ShopContactsRetrieveApi(APIView, ShopContactsSelector):
             ref_name = 'shop.ShopContactsRetrieveOutputSerializer'
 
     @extend_schema(
+        tags=["Info"],
+        summary="Get object with contact details.",
+        description="Get object with contact details.",
         responses={200: OutputSerializer()}
     )
     def get(self, request):
