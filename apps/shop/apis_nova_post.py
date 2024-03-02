@@ -1,15 +1,17 @@
+import urllib.request
 from os import getenv
 
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from django.http import FileResponse
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .np import NovaPoshtaClient
 from apps.core.exceptions import ErrorSerializer404
 
+from .np import NovaPoshtaClient
 
-NP_API_KEY = getenv('NP_API_KEY')  # api key for nova poshta
+NP_API_KEY = getenv("NP_API_KEY")  # api key for nova poshta
 np = NovaPoshtaClient(NP_API_KEY)
 
 
@@ -94,6 +96,7 @@ class WarehousesAPI(APIView):
         Ref = serializers.UUIDField()
         Description = serializers.CharField(max_length=255)
         Number = serializers.CharField(max_length=255, allow_blank=True)
+        WarehouseIndex = serializers.CharField(max_length=255, allow_blank=True)
 
     @extend_schema(
         tags=["NP"],
@@ -124,3 +127,155 @@ class WarehousesAPI(APIView):
         output_serializer.is_valid(raise_exception=True)
         return Response(output_serializer.validated_data)
 
+
+class CreateContactAPI(APIView):
+    class InputCreateContactSerializer(serializers.Serializer):
+        first_name = serializers.CharField(max_length=255)
+        middle_name = serializers.CharField(max_length=255)
+        last_name = serializers.CharField(max_length=255)
+        phone = serializers.CharField(max_length=12)
+        email = serializers.EmailField()
+
+        def validate_phone(self, phone):
+            if (
+                len(phone) != len("380685280269")
+                or not phone.startswith("380")
+                or not phone.isdigit()
+            ):
+                raise serializers.ValidationError(
+                    "phone number must be like 380985280211"
+                )
+            return phone
+
+    class OutputCreateContactSerializer(serializers.Serializer):
+        Ref = serializers.UUIDField()
+        Description = serializers.CharField(max_length=255)
+        LastName = serializers.CharField(max_length=255)
+        FirstName = serializers.CharField(max_length=255)
+        MiddleName = serializers.CharField(max_length=255)
+
+    @extend_schema(
+        tags=["NP"],
+        summary="Create contact",
+        description="Прізвище, імїя, побатькові виключно українською мовою.",
+        request=InputCreateContactSerializer,
+        responses={
+            201: OutputCreateContactSerializer,
+            400: status.HTTP_400_BAD_REQUEST,
+            404: ErrorSerializer404,
+        },
+    )
+    def post(self, request):
+        serializer = self.InputCreateContactSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        contact = np.create_contact(**serializer.validated_data)
+        return Response(contact, status=status.HTTP_201_CREATED)
+
+
+class ListContactsAPI(APIView):
+    @extend_schema(
+        tags=["NP"],
+        summary="List all contacts",
+        description="List all contacts.",
+        responses={
+            # 201: OutputCreateContactSerializer,
+            400: status.HTTP_400_BAD_REQUEST,
+            404: ErrorSerializer404,
+        },
+    )
+    def get(self, request):
+        contacts = np.list_contacts()
+        return Response(contacts)
+
+
+class CreateWaybillAPI(APIView):
+    class InputCreateWaybillSerializer(serializers.Serializer):
+        description = serializers.CharField(max_length=255)
+        cost = serializers.DecimalField(max_digits=5, decimal_places=2, min_value=0.01)
+        volume_general = serializers.DecimalField(
+            max_digits=6, decimal_places=5, min_value=0.00001
+        )
+        weight = serializers.DecimalField(
+            max_digits=7, decimal_places=5, min_value=0.00001
+        )
+        recipient_contact = serializers.UUIDField()
+        recipient_address = serializers.UUIDField()
+        recipient_warehouse_index = serializers.CharField(max_length=255)
+        recipient_phone = serializers.CharField(max_length=12)
+
+        def validate_cost(self, cost):
+            if cost <= 0:
+                raise serializers.ValidationError("cost must be positive")
+            return cost
+
+        def validate_recipient_phone(self, recipient_phone):
+            if (
+                len(recipient_phone) != len("380965280211")
+                or not recipient_phone.startswith("380")
+                or not recipient_phone.isdigit()
+            ):
+                raise serializers.ValidationError(
+                    "phone number must be like 380985280211"
+                )
+            return recipient_phone
+
+    class OutputCreateWaybillSerializer(serializers.Serializer):
+        IntDocNumber = serializers.IntegerField(min_value=1)
+        CostOnSite = serializers.IntegerField()
+        EstimatedDeliveryDate = serializers.DateField(format="%d.%m.%Y")
+        Ref = serializers.UUIDField()
+
+
+    @extend_schema(
+        tags=["NP"],
+        summary="Create waybill",
+        description="create waybill. volume_general - Об'єм вантажу в м^3, weight - Вага вантажу",
+        request=InputCreateWaybillSerializer,
+        responses={
+            201: OutputCreateWaybillSerializer,
+            400: status.HTTP_400_BAD_REQUEST,
+            404: ErrorSerializer404,
+        },
+    )
+    def post(self, request):
+        serializer = self.InputCreateWaybillSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        waybill = np.create_waybill(**serializer.validated_data)
+        return Response(waybill, status=status.HTTP_201_CREATED)
+
+
+class PrintWaybillAPI(APIView):
+    @extend_schema(
+        tags=["NP"],
+        summary="print waybill",
+        description="print waybill",
+        responses={
+            200: OpenApiResponse(description="Pdf file"),
+        },
+    )
+    def get(self, request, waybill_number):
+        url = f"https://my.novaposhta.ua/orders/printDocument/orders[]/{waybill_number}/type/pdf/apiKey/{NP_API_KEY}"
+        file = urllib.request.urlopen(url)
+        return FileResponse(file, as_attachment=True, filename=f"{waybill_number}.pdf")
+
+
+class SetSenderAdressAPI(APIView):
+    class InputSetSenderAdressSerializer(serializers.Serializer):
+        sender_address = serializers.UUIDField()
+        sender_warehouse_index = serializers.CharField(max_length=255)
+
+    @extend_schema(
+        tags=["NP"],
+        summary="Set sender address",
+        description="Set sender address(Ref and Index warehouse)",
+        request=InputSetSenderAdressSerializer,
+        responses={
+            200: OpenApiResponse(),
+            404: ErrorSerializer404,
+        },
+    )
+    def post(self, request):
+        serializer = self.InputSetSenderAdressSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        np.fill_info_about_sender(**serializer.validated_data)
+        return Response(status=status.HTTP_200_OK)

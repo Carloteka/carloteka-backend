@@ -3,7 +3,7 @@ from django.db import connection
 
 from rest_framework import exceptions
 
-from apps.shop.models import ItemModel, OrderItemModel, OrderModel, ReviewModel
+from apps.shop.models import ItemModel, OrderItemModel, OrderModel, ReviewModel, NovaPost
 
 
 def get_item_by_id(item_id):
@@ -24,6 +24,17 @@ def get_order_by_id(item_id):
 
 def order_create(*args, **kwargs) -> OrderModel:
     items = kwargs.pop("items")
+
+    waybill: dict | None = kwargs.pop("waybill_np", None)
+    if waybill:
+        waybill_np_obj = NovaPost(ref=waybill["ref"],
+                                  int_doc_number=waybill["int_doc_number"],
+                                  cost_on_site=waybill["cost_on_site"],
+                                  estimated_delivery_date=waybill["estimated_delivery_date"])
+        waybill_np_obj.save()
+    else:
+        waybill_np_obj = None
+
     # calculating the actual sum of prices of goods multiplied by quantity
     sum_amount = Decimal(
         sum(
@@ -38,7 +49,7 @@ def order_create(*args, **kwargs) -> OrderModel:
         raise exceptions.ValidationError(
             {"total_amount": f"Total amount is not correct. Should be {sum_amount}"}
         )
-    obj = OrderModel(**kwargs)
+    obj = OrderModel(nova_post=waybill_np_obj, **kwargs)
     obj.full_clean()
     obj.save()
 
@@ -46,6 +57,7 @@ def order_create(*args, **kwargs) -> OrderModel:
         item_obj = get_item_by_id(item.get("item"))
         quantity = item.get("quantity")
         OrderItemModel(order=obj, item=item_obj, quantity=quantity).save()
+
     return obj
 
 
