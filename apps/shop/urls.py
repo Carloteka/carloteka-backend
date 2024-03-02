@@ -10,7 +10,8 @@ from .apis import (
     OrderRetrieveAPI,
     ReviewCreateApi,
 )
-from .apis_nova_post import AreasAPI, SettlementsAPI, WarehousesAPI
+from .apis_nova_post import AreasAPI, SettlementsAPI, WarehousesAPI, CreateContactAPI, ListContactsAPI, \
+    CreateWaybillAPI, PrintWaybillAPI, SetSenderAdressAPI
 
 categories_urlpatterns = [
     path('', CategoryListApi.as_view(), name='list'),
@@ -31,9 +32,14 @@ orders_urlpatterns = [
     path('create/', OrderCreateAPI.as_view(), name='create')
 ]
 np_urlpatterns = [
+    path('sender_address/', SetSenderAdressAPI.as_view(), name='sender_address'),
     path('areas/', AreasAPI.as_view(), name='areas'),
     path('settlements/', SettlementsAPI.as_view(), name='settlements'),
     path('warehouses/', WarehousesAPI.as_view(), name='warehouses'),
+    path('contact/create/', CreateContactAPI.as_view(), name='create_contact'),
+    path('contact/list/', ListContactsAPI.as_view(), name='list_contacts'),
+    path('waybill/create/', CreateWaybillAPI.as_view(), name='create_waybill'),
+    path('waybill/print/<int:waybill_number>', PrintWaybillAPI.as_view(), name='print_waybill'),
 ]
 urlpatterns = [
     path('categories/', include((categories_urlpatterns, 'categories'))),
