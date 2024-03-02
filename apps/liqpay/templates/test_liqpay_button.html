@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="POST" action="https://www.liqpay.ua/api/3/checkout" accept-charset="utf-8">
+    <input type="hidden" name="data" value="{{ data }}"/>
+    <input type="hidden" name="signature" value="{{ signature }}"/>
+    <script type="text/javascript" src="https://static.liqpay.ua/libjs/sdk_button.js"></script>
+    <sdk-button label="Сплатити" background="#77CC5D" onClick="submit()"></sdk-button>
+</form>
+</body>
+</html>
