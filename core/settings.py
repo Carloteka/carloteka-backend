@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 
     'apps.accounts',
     'apps.shop',
+    'apps.liqpay',
 ]
 
 MIDDLEWARE = [

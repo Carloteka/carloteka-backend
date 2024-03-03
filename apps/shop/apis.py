@@ -361,7 +361,8 @@ class OrderCreateAPI(APIView):
 
         class Meta:
             model = OrderModel
-            exclude = ["item_set", "nova_post"]
+
+            exclude = ["item_set", "no_call_back", "nova_post"]
 
     @extend_schema(
         tags=["Order"],
@@ -386,7 +387,7 @@ class OrderRetrieveAPI(APIView, OrderSelector):
 
         class Meta:
             model = OrderModel
-            fields = "__all__"
+            exclude = ["no_call_back"]
 
         class OrderItemsSerializer(serializers.ModelSerializer):
             class Meta:
