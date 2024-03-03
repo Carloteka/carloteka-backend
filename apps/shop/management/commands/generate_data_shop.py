@@ -11,18 +11,20 @@ from apps.shop.models import (
     ItemImageModel,
     ItemStatsModel,
     ReviewModel,
-    OrderModel
+    OrderModel,
+    OrderItemModel,
 )
 from django.conf import settings
 from datetime import timedelta
 from django.utils import timezone
+from faker import Faker
 
 num_category_entries = 2
 
 
 class Command(BaseCommand):
     help = 'Generate entries for ShopContactsModel, CategoryModel, CategoryImageModel, ItemModel and ItemImageModel.'
-
+    count_orders = 10
     @transaction.atomic()
     def handle(self, *args, **options):
         self.shop_contacts()
@@ -31,6 +33,7 @@ class Command(BaseCommand):
         self.item_images()
         self.item_stats()
         self.review()
+        self.generate_order()
 
     def shop_contacts(self):
         contact_data = {
@@ -209,3 +212,37 @@ class Command(BaseCommand):
                     review.save()
 
         generate_review_data()
+
+    def generate_order(self):
+        fake = Faker("uk_UA")
+        items = ItemModel.objects.all()
+
+        def create_order():
+            order = OrderModel.objects.create(
+                first_name=fake.first_name(),
+                last_name=fake.last_name(),
+                email=fake.email(),
+                phone_number="068" + str(random.randint(1000000, 9999999)),
+                country="UA",
+                region=fake.region(),
+                city=fake.city_name(),
+                delivery_service=random.choice(("nova_post", "ukr_post")),
+                status=random.choice(('new', 'confirmed', 'shipped', 'delivered', 'complete', 'canceled')),
+                payment_method=random.choice(("online, postpay")),
+                payment_status=random.choice(("None", 'error', 'liqpay')),
+                no_call_back=bool(random.randint(0, 1))
+            )
+            return order
+
+        if len(OrderModel.objects.all()) < self.count_orders:
+            for i in range(self.count_orders):
+                _order = create_order()
+                item1 = random.choice(items)
+                order_item1 = OrderItemModel.objects.create(
+                    order=_order,
+                    item=item1,
+                    quantity=2,
+                )
+                _order.total_amount = order_item1.quantity * item1.price
+                _order.save()
+                print(f"Order {_order.id} generated.")
