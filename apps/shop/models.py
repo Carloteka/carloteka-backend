@@ -143,6 +143,11 @@ class OrderModel(models.Model):
         ('online', 'Оплата онлайн'),
         ('cod', 'Накладений платіж'),
         ('postpay', ' После оплата')
+        ]
+    PAYMENT_STATUS = [
+        ('None', 'Не оплачено'),
+        ('error', 'error'),
+        ('liqpay', 'Liqpay'),
     ]
     DELIVERY_CHOCES = [
         ('nova_post', 'Нова пошта'),
@@ -158,6 +163,8 @@ class OrderModel(models.Model):
     postoffice = models.CharField(max_length=50, null=True, blank=True)
     postbox = models.CharField(max_length=50, null=True, blank=True)
     payment_method = models.CharField(max_length=50, choices=PAYMENT_CHOICES)
+    payment_status = models.CharField(max_length=50, choices=PAYMENT_STATUS, default='None')
+    acq_id = models.IntegerField(verbose_name="ID еквайера", null=True, blank=True)
     phone_number = models.CharField(max_length=20)
     email = models.EmailField()
     comment = models.TextField(null=True, blank=True)
