@@ -17,7 +17,7 @@ def get_item_by_id(item_id):
 def get_order_by_id(item_id):
     try:
         order = OrderModel.objects.get(id=item_id)
-    except ItemModel.DoesNotExist:
+    except OrderModel.DoesNotExist:
         raise exceptions.NotFound({"detail": "Order not found"})
     return order
 

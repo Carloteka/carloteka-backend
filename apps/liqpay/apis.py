@@ -12,13 +12,13 @@ from apps.core.exceptions import ErrorSerializer404
 from apps.liqpay.utils import change_order_payment_status
 from liqpay import LiqPay
 
+from apps.shop.servises import get_order_by_id
+
 liq_pay = LiqPay(getenv("LIQPAY_PUBLIC_KEY"), getenv("LIQPAY_PRIVATE_KEY"))
 
 
 class PayApi(APIView):
     class InputPayApiSerializer(serializers.Serializer):
-        amount = serializers.DecimalField(max_digits=50, decimal_places=2)
-        description = serializers.CharField(max_length=255)
         order_id = serializers.IntegerField()
 
     class OutputPayApiSerializer(serializers.Serializer):
@@ -31,38 +31,24 @@ class PayApi(APIView):
         responses={200: OutputPayApiSerializer(), 404: ErrorSerializer404()},
         parameters=[
             OpenApiParameter(
-                name="amount",
-                location=OpenApiParameter.QUERY,
-                description="amount",
-                required=True,
-                type=float,
-            ),
-            OpenApiParameter(
                 name="order_id",
                 location=OpenApiParameter.QUERY,
                 description="order_id",
                 required=True,
                 type=int,
             ),
-            OpenApiParameter(
-                name="description",
-                location=OpenApiParameter.QUERY,
-                description="description",
-                required=True,
-                type=str,
-            ),
         ],
     )
     def get(self, request, *args, **kwargs):
         serializer = self.InputPayApiSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
-
+        order = get_order_by_id(serializer.validated_data["order_id"])
         params = {
             "action": "pay",
-            "amount": str(serializer.validated_data["amount"]),
+            "amount": str(order.total_amount),
             "currency": "UAH",
-            "description": serializer.validated_data["description"],
-            "order_id": serializer.validated_data["order_id"],
+            "description": ", ".join([item.name for item in order.item_set.all()]),
+            "order_id": order.id,
             "version": "3",
             "result_url": getenv("HOST_SERVER") + "/liqpay/pay-status/",
             "server_url": getenv("HOST_CLIENT") + "/api/liqpay/pay-callback/",
@@ -70,8 +56,8 @@ class PayApi(APIView):
 
         data = liq_pay.cnb_data(params)
         signature = liq_pay.cnb_signature(params)
-        # return Response({"data": data, "signature": signature})
-        return render(request, "test_liqpay_button.html", {"data": data, "signature": signature})
+        return Response({"data": data, "signature": signature})
+        # return render(request, "test_liqpay_button.html", {"data": data, "signature": signature})
 
 
 @method_decorator(csrf_exempt, name="dispatch")
