@@ -126,7 +126,7 @@ class NovaPost(models.Model):
 
     ref = models.UUIDField(primary_key=True, editable=False, unique=True)
     int_doc_number = models.CharField(max_length=20)
-    cost_on_site = models.DecimalField(max_digits=5, decimal_places=2)
+    cost_on_site = models.DecimalField(max_digits=10, decimal_places=2)
     estimated_delivery_date = models.DateField()
 
 

@@ -1,4 +1,7 @@
+import datetime
 import os
+import uuid
+
 from django.db import transaction
 import random
 from django.core.management.base import BaseCommand
@@ -12,7 +15,7 @@ from apps.shop.models import (
     ItemStatsModel,
     ReviewModel,
     OrderModel,
-    OrderItemModel,
+    OrderItemModel, NovaPost,
 )
 from django.conf import settings
 from datetime import timedelta
@@ -214,6 +217,8 @@ class Command(BaseCommand):
         generate_review_data()
 
     def generate_order(self):
+        OrderModel.objects.all().delete()
+        OrderItemModel.objects.all().delete()
         fake = Faker("uk_UA")
         items = ItemModel.objects.all()
 
@@ -228,12 +233,12 @@ class Command(BaseCommand):
                 city=fake.city_name(),
                 delivery_service=random.choice(("nova_post", "ukr_post")),
                 status=random.choice(('new', 'confirmed', 'shipped', 'delivered', 'complete', 'canceled')),
-                payment_method=random.choice(("online, postpay")),
-                payment_status=random.choice(("None", 'error', 'liqpay')),
+                payment_method=random.choice(("online", "postpay")),
+                payment_status=random.choice(("None", "error", "liqpay")),
                 no_call_back=bool(random.randint(0, 1))
             )
             return order
-
+        import decimal
         if len(OrderModel.objects.all()) < self.count_orders:
             for i in range(self.count_orders):
                 _order = create_order()
@@ -241,8 +246,19 @@ class Command(BaseCommand):
                 order_item1 = OrderItemModel.objects.create(
                     order=_order,
                     item=item1,
-                    quantity=2,
+                    quantity=i+1,
                 )
                 _order.total_amount = order_item1.quantity * item1.price
+                if _order.payment_status in ('error', 'liqpay'):
+                    _order.acq_id = random.randint(100000, 999999)
+                if _order.delivery_service == "nova_post":
+                    print(round(_order.total_amount, 2))
+                    np = NovaPost.objects.create(
+                        ref=str(uuid.uuid4()),
+                        int_doc_number="12345",
+                        cost_on_site=decimal.Decimal(round(_order.total_amount, 2)),
+                        estimated_delivery_date=datetime.date.today()
+                    )
+                    _order.nova_post = np
                 _order.save()
                 print(f"Order {_order.id} generated.")
