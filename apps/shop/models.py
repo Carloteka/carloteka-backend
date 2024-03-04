@@ -126,7 +126,7 @@ class NovaPost(models.Model):
 
     ref = models.UUIDField(primary_key=True, editable=False, unique=True)
     int_doc_number = models.CharField(max_length=20)
-    cost_on_site = models.DecimalField(max_digits=5, decimal_places=2)
+    cost_on_site = models.DecimalField(max_digits=10, decimal_places=2)
     estimated_delivery_date = models.DateField()
 
 
@@ -156,26 +156,33 @@ class OrderModel(models.Model):
 
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    email = models.EmailField()
+    phone_number = models.CharField(max_length=20)
+
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    item_set = models.ManyToManyField(ItemModel, through="OrderItemModel")
+
     country = models.CharField(max_length=100)
     region = models.CharField(max_length=100)
     city = models.CharField(max_length=50)
     delivery_service = models.CharField(max_length=100, choices=DELIVERY_CHOCES)
+
     postoffice = models.CharField(max_length=50, null=True, blank=True)
     postbox = models.CharField(max_length=50, null=True, blank=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     payment_method = models.CharField(max_length=50, choices=PAYMENT_CHOICES)
     payment_status = models.CharField(max_length=50, choices=PAYMENT_STATUS, default='None')
     acq_id = models.IntegerField(verbose_name="ID еквайера", null=True, blank=True)
-    phone_number = models.CharField(max_length=20)
-    email = models.EmailField()
+
+    nova_post = models.OneToOneField(NovaPost, related_name='nova_post', on_delete=models.CASCADE,
+                                     null=True, blank=True, default=None)
+
+    no_call_back = models.BooleanField(default=False, verbose_name="Не передзвонювати")
+
     comment = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
-    item_set = models.ManyToManyField(ItemModel, through="OrderItemModel")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
-    no_call_back = models.BooleanField(default=False, verbose_name="Не передзвонювати")
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    nova_post = models.OneToOneField(NovaPost, related_name='nova_post', on_delete=models.CASCADE,
-                                     null=True, blank=True, default=None)
 
     # TODO add clear_all (look in styleguide)
     def clean_fields(self, exclude=None):
