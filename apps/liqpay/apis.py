@@ -1,6 +1,5 @@
 from os import getenv
 
-from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -57,10 +56,9 @@ class PayApi(APIView):
         data = liq_pay.cnb_data(params)
         signature = liq_pay.cnb_signature(params)
         return Response({"data": data, "signature": signature})
-        # return render(request, "test_liqpay_button.html", {"data": data, "signature": signature})
 
 
-@method_decorator(csrf_exempt, name="dispatch")
+# @method_decorator(csrf_exempt, name="dispatch")
 class PayCallbackApi(APIView):
 
     def post(self, request, *args, **kwargs):
@@ -78,7 +76,7 @@ class PayCallbackApi(APIView):
         response = liq_pay.decode_data_from_str(data)
         print("callback data", response)
         # change status payment in order
-        if response.status == "success":
+        if response["status"] == "success":
             change_order_payment_status(
                 response["order_id"], "liqpay", response["acq_id"]
             )
@@ -101,7 +99,7 @@ class GetLiqPayStatusApi(APIView):
         status = serializers.CharField(max_length=50)  # must be success
         paytype = serializers.CharField(max_length=50)
         acq_id = serializers.IntegerField()
-        sender_phone = serializers.CharField(max_length=50)
+        sender_phone = serializers.CharField(max_length=50, required=False)
         description = serializers.CharField(max_length=250)
         amount = serializers.FloatField()
 
