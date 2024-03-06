@@ -62,16 +62,13 @@ class PayApi(APIView):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class PayCallbackApi(APIView):
-    class InputPayCallbackApiSerializer(serializers.Serializer):
-        data = serializers.CharField(max_length=255)
-        signature = serializers.CharField(max_length=255)
 
     def post(self, request, *args, **kwargs):
-        serializer = self.InputPayCallbackApiSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        data = serializer.validated_data.get("data")
-        signature = serializer.validated_data.get("signature")
-
+        data = request.data.get('data')
+        signature = request.data.get('signature')
+        print("raw data", data)
+        print("len data:", len(data))
+        print("raw signature", signature)
         sign = liq_pay.str_to_sign(
             getenv("LIQPAY_PRIVATE_KEY") + data + getenv("LIQPAY_PRIVATE_KEY")
         )
@@ -145,7 +142,7 @@ class GetLiqPayStatusApi(APIView):
         if data["status"] == "success":
             output_serializer = self.OutputGetLiqPayStatusApi(data=data)
             output_serializer.is_valid()
-            return Response(data=output_serializer)
+            return Response(data=output_serializer.validated_data)
         # not payed
         output_serializer = self.OutputErrorApiSerializer(data=data)
         output_serializer.is_valid()
