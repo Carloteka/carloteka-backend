@@ -17,6 +17,7 @@ liq_pay = LiqPay(getenv("LIQPAY_PUBLIC_KEY"), getenv("LIQPAY_PRIVATE_KEY"))
 
 
 class PayApi(APIView):
+    """Api for creation link for payment service."""
     class InputPayApiSerializer(serializers.Serializer):
         order_id = serializers.IntegerField()
 
@@ -49,7 +50,7 @@ class PayApi(APIView):
             "description": ", ".join([item.name for item in order.item_set.all()]),
             "order_id": order.id,
             "version": "3",
-            "result_url": getenv("HOST_SERVER") + "/liqpay/pay-status/",
+            "result_url": getenv("HOST_SERVER") + "/payment",
             "server_url": getenv("HOST_CLIENT") + "/api/liqpay/pay-callback/",
         }
 
@@ -58,9 +59,9 @@ class PayApi(APIView):
         return Response({"data": data, "signature": signature})
 
 
-# @method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(csrf_exempt, name="dispatch")
 class PayCallbackApi(APIView):
-
+    """Endpoint for receiving callback request after payment."""
     def post(self, request, *args, **kwargs):
         data = request.data.get('data')
         signature = request.data.get('signature')
