@@ -18,12 +18,13 @@ class LimitOffsetPagination(_LimitOffsetPagination):
             ('results', data)
         ])
 
-    def get_paginated_response(self, data):
+    def get_paginated_response(self, data, **kwargs):
         """
         We redefine this method in order to return `limit` and `offset`.
         This is used by the frontend to construct the pagination itself.
         """
-        return Response(OrderedDict([
+        response = OrderedDict(kwargs)  # add additional parameter to response
+        response.update(OrderedDict([
             ('limit', self.limit),
             ('offset', self.offset),
             ('count', self.count),
@@ -31,17 +32,18 @@ class LimitOffsetPagination(_LimitOffsetPagination):
             ('previous', self.get_previous_link()),
             ('results', data)
         ]))
+        return Response(response)
 
 
-def get_paginated_response(*, pagination_class, serializer_class, queryset, request, view):
+def get_paginated_response(*, pagination_class, serializer_class, queryset, request, view, **kwargs):
     paginator = pagination_class()
 
     page = paginator.paginate_queryset(queryset, request, view=view)
 
     if page is not None:
         serializer = serializer_class(page, many=True)
-        return paginator.get_paginated_response(serializer.data)
+        return paginator.get_paginated_response(serializer.data, **kwargs)
 
     serializer = serializer_class(queryset, many=True)
 
-    return Response(data=serializer.data)
+    return Response(serializer.data, **kwargs)

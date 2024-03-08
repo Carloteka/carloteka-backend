@@ -176,9 +176,42 @@ class ItemListApi(APIView, ItemSelector):
         class Meta:
             ref_name = 'shop.ItemListOutputSerializer'
 
+    class BaseOutputSerializer(serializers.Serializer):
+        """For SWAGGER representation"""
+        in_stock_count = serializers.IntegerField()
+        specific_order_count = serializers.IntegerField()
+        limit = serializers.IntegerField()
+        offset = serializers.IntegerField()
+        count = serializers.IntegerField()
+        next = serializers.CharField(max_length=1000)
+        previous = serializers.CharField(max_length=1000)
+
+        results = inline_serializer(many=True, fields={
+            "id": serializers.IntegerField(),
+            "name": serializers.CharField(max_length=128),
+            "price": serializers.FloatField(),
+            "discounted_price": serializers.FloatField(allow_null=True, required=False),
+            "length": serializers.FloatField(allow_null=True, required=False),
+            "height": serializers.FloatField(allow_null=True, required=False),
+            "width": serializers.FloatField(allow_null=True, required=False),
+            "stock": serializers.ChoiceField(choices=ItemModel.STOCK_STATUS_CHOICES),
+            "mini_description": serializers.CharField(max_length=2500),
+            "image_set": inline_serializer(many=True, fields={
+                'id': serializers.IntegerField(),
+                'image': serializers.ImageField()
+            }),
+            "category": inline_serializer(fields={
+                'id': serializers.IntegerField()
+            }),
+            "mini_image": serializers.ImageField(allow_null=True, required=False),
+            "slug": serializers.SlugField(max_length=100),
+            "stars": serializers.FloatField(default=0),
+            "review_count": serializers.IntegerField(default=0),
+        })
+
     @extend_schema(
         tags=["Item"],
-        responses={200: OutputSerializer()},
+        responses={200: BaseOutputSerializer()},
         parameters=[
             OpenApiParameter(
                 name='category__id',
@@ -240,15 +273,25 @@ class ItemListApi(APIView, ItemSelector):
     def get(self, request):
         filters_serializer = self.FilterSerializer(data=request.query_params)
         filters_serializer.is_valid(raise_exception=True)
-        print(filters_serializer.validated_data)
         items = self.item_list(filters=filters_serializer.validated_data)
+        # count items with IN_STOCK and SPECIFIC_ORDER stock parameter
+        filter_for_in_stock = dict(filters_serializer.validated_data)
+        filter_for_specific_order = dict(filters_serializer.validated_data)
+
+        filter_for_in_stock.update({"stock": ["IN_STOCK"]})
+        filter_for_specific_order.update({"stock": ["SPECIFIC_ORDER"]})
+
+        in_stock = self.item_list(filters=filter_for_in_stock).count()
+        specific_order = self.item_list(filters=filter_for_specific_order).count()
 
         return get_paginated_response(
             pagination_class=self.Pagination,
             serializer_class=self.OutputSerializer,
             queryset=items,
             request=request,
-            view=self
+            view=self,
+            in_stock_count=in_stock,
+            specific_order_count=specific_order
         )
 
 
@@ -411,6 +454,7 @@ class OrderRetrieveAPI(APIView, OrderSelector):
 
     class OutputOrdersSerializer(serializers.ModelSerializer):
         """For swagger represents."""
+
         class Meta:
             model = OrderModel
             fields = "__all__"
