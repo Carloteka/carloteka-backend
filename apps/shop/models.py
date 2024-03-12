@@ -45,6 +45,7 @@ class ItemModel(models.Model):
     length = models.FloatField(default=None, null=True, blank=True)
     height = models.FloatField(default=None, null=True, blank=True)
     width = models.FloatField(default=None, null=True, blank=True)
+    weight = models.FloatField(default=None, null=True, blank=True)
     stock = models.CharField(
         max_length=40,
         choices=STOCK_STATUS_CHOICES,
@@ -154,8 +155,8 @@ class OrderModel(models.Model):
         ('ukr_post', 'Укрпошта')
     ]
 
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
     email = models.EmailField()
     phone_number = models.CharField(max_length=20)
 
@@ -164,11 +165,11 @@ class OrderModel(models.Model):
 
     country = models.CharField(max_length=100)
     region = models.CharField(max_length=100)
-    city = models.CharField(max_length=50)
+    city = models.CharField(max_length=100)
     delivery_service = models.CharField(max_length=100, choices=DELIVERY_CHOCES)
 
-    postoffice = models.CharField(max_length=50, null=True, blank=True)
-    postbox = models.CharField(max_length=50, null=True, blank=True)
+    postoffice = models.CharField(max_length=150, null=True, blank=True)
+    postbox = models.CharField(max_length=100, null=True, blank=True)
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     payment_method = models.CharField(max_length=50, choices=PAYMENT_CHOICES)

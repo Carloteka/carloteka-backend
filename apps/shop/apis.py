@@ -91,6 +91,7 @@ class ItemRetrieveApi(APIView, ItemSelector):
         length = serializers.FloatField(allow_null=True, required=False)
         height = serializers.FloatField(allow_null=True, required=False)
         width = serializers.FloatField(allow_null=True, required=False)
+        weight = serializers.FloatField(allow_null=True, required=False)
         stock = serializers.ChoiceField(choices=ItemModel.STOCK_STATUS_CHOICES)
         mini_description = serializers.CharField(max_length=2500)
         description = serializers.CharField(max_length=5000)
@@ -159,6 +160,7 @@ class ItemListApi(APIView, ItemSelector):
         length = serializers.FloatField(allow_null=True, required=False)
         height = serializers.FloatField(allow_null=True, required=False)
         width = serializers.FloatField(allow_null=True, required=False)
+        weight = serializers.FloatField(allow_null=True, required=False)
         stock = serializers.ChoiceField(choices=ItemModel.STOCK_STATUS_CHOICES)
         mini_description = serializers.CharField(max_length=2500)
         image_set = inline_serializer(many=True, fields={
@@ -194,6 +196,7 @@ class ItemListApi(APIView, ItemSelector):
             "length": serializers.FloatField(allow_null=True, required=False),
             "height": serializers.FloatField(allow_null=True, required=False),
             "width": serializers.FloatField(allow_null=True, required=False),
+            "weight": serializers.FloatField(allow_null=True, required=False),
             "stock": serializers.ChoiceField(choices=ItemModel.STOCK_STATUS_CHOICES),
             "mini_description": serializers.CharField(max_length=2500),
             "image_set": inline_serializer(many=True, fields={
