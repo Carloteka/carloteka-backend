@@ -206,7 +206,7 @@ class NovaPoshtaClient:
         return self.warehouses[settlement_ref]["data"]
 
     def create_contact(
-        self, first_name: str, middle_name: str, last_name: str, phone: str, email: str
+        self, first_name: str, last_name: str, phone: str, email: str
     ) -> dict:
         """
         Create a new contact to send a package
@@ -215,7 +215,6 @@ class NovaPoshtaClient:
         """
         method_properties = {
             "FirstName": first_name.capitalize(),
-            "MiddleName": middle_name.capitalize(),
             "LastName": last_name.capitalize(),
             "Phone": str(phone),
             "Email": email,

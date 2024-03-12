@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from apps.core.exceptions import ErrorSerializer404
 
 from .np import NovaPoshtaClient
+from .utils import date_convertor
 
 NP_API_KEY = getenv("NP_API_KEY")  # api key for nova poshta
 np = NovaPoshtaClient(NP_API_KEY)
@@ -131,7 +132,6 @@ class WarehousesAPI(APIView):
 class CreateContactAPI(APIView):
     class InputCreateContactSerializer(serializers.Serializer):
         first_name = serializers.CharField(max_length=255)
-        middle_name = serializers.CharField(max_length=255)
         last_name = serializers.CharField(max_length=255)
         phone = serializers.CharField(max_length=12)
         email = serializers.EmailField()
@@ -152,7 +152,6 @@ class CreateContactAPI(APIView):
         Description = serializers.CharField(max_length=255)
         LastName = serializers.CharField(max_length=255)
         FirstName = serializers.CharField(max_length=255)
-        MiddleName = serializers.CharField(max_length=255)
 
     @extend_schema(
         tags=["NP"],
@@ -220,10 +219,10 @@ class CreateWaybillAPI(APIView):
             return recipient_phone
 
     class OutputCreateWaybillSerializer(serializers.Serializer):
-        IntDocNumber = serializers.IntegerField(min_value=1)
-        CostOnSite = serializers.IntegerField()
-        EstimatedDeliveryDate = serializers.DateField(format="%d.%m.%Y")
-        Ref = serializers.UUIDField()
+        int_doc_number = serializers.IntegerField(min_value=1)
+        cost_on_site = serializers.IntegerField()
+        estimated_delivery_date = serializers.DateField(format="%Y.%m.%d")
+        ref = serializers.UUIDField()
 
 
     @extend_schema(
@@ -241,7 +240,13 @@ class CreateWaybillAPI(APIView):
         serializer = self.InputCreateWaybillSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         waybill = np.create_waybill(**serializer.validated_data)
-        return Response(waybill, status=status.HTTP_201_CREATED)
+        data = {
+            "ref": waybill["Ref"],
+            "int_doc_number": waybill["IntDocNumber"],
+            "cost_on_site": waybill["CostOnSite"],
+            "estimated_delivery_date": date_convertor(waybill["EstimatedDeliveryDate"])  # get form np "dd.mm.yy"
+        }
+        return Response(data, status=status.HTTP_201_CREATED)
 
 
 class PrintWaybillAPI(APIView):
