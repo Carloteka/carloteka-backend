@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from apps.core.exceptions import ErrorSerializer404
 
 from .np import NovaPoshtaClient
+from .utils import date_convertor
 
 NP_API_KEY = getenv("NP_API_KEY")  # api key for nova poshta
 np = NovaPoshtaClient(NP_API_KEY)
@@ -220,7 +221,7 @@ class CreateWaybillAPI(APIView):
     class OutputCreateWaybillSerializer(serializers.Serializer):
         int_doc_number = serializers.IntegerField(min_value=1)
         cost_on_site = serializers.IntegerField()
-        estimated_delivery_date = serializers.DateField(format="%d.%m.%Y")
+        estimated_delivery_date = serializers.DateField(format="%Y.%m.%d")
         ref = serializers.UUIDField()
 
 
@@ -243,7 +244,7 @@ class CreateWaybillAPI(APIView):
             "ref": waybill["Ref"],
             "int_doc_number": waybill["IntDocNumber"],
             "cost_on_site": waybill["CostOnSite"],
-            "estimated_delivery_date": waybill["EstimatedDeliveryDate"]
+            "estimated_delivery_date": date_convertor(waybill["EstimatedDeliveryDate"])  # get form np "dd.mm.yy"
         }
         return Response(data, status=status.HTTP_201_CREATED)
 

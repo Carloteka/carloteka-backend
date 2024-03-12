@@ -1,6 +1,7 @@
+import datetime
 from uuid import uuid4
 
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 
 
 def create_serializer_class(name, fields):
@@ -20,3 +21,18 @@ def inline_serializer(*, fields, name=None, data=None, **kwargs):
         return serializer_class(data=data, **kwargs)
 
     return serializer_class(**kwargs)
+
+
+def date_convertor(date: str) -> datetime.date:
+    """
+    corvert date format "DD.MM.YYYY" to datetime format "YYYY-MM-DD"
+    :param date: str
+    :return: datetime
+    """
+    try:
+        day, month, year = map(int, date.strip().split('.'))
+        correct_date = datetime.date(year, month, day)
+    except (ValueError, TypeError):
+        raise exceptions.APIException(detail='Invalid date format')
+
+    return correct_date
