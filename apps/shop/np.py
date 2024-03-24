@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from pprint import pprint
+import time
 
 import httpx
 from rest_framework import exceptions
@@ -7,7 +8,7 @@ from rest_framework import exceptions
 from apps.shop.models import ShopContactsModel
 
 HEADERS = {"Content-Type": "application/json"}
-
+ATTEMPTS = 10  # number of attempts to send a request
 
 def check_date(date: datetime, days: int) -> bool:
     """
@@ -115,12 +116,13 @@ class NovaPoshtaClient:
             "json": data,
             "timeout": self.timeout,
         }
-        with self.http_client() as _client:
-            pprint(request)
-            response = _client.post(**request).json()
-        if response["success"]:
-            return response
-        raise exceptions.NotFound({"detail": response["errors"]})
+        for _ in range(ATTEMPTS):
+            with self.http_client() as _client:
+                response = _client.post(**request).json()
+            if response["success"]:
+                return response
+            time.sleep(0.5)
+        raise exceptions.NotFound({"detail": response["errors"]+response.get("info")})
 
     def get_areas(self) -> dict:
         """
