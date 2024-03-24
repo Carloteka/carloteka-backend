@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from pprint import pprint
+import time
 
 import httpx
 from rest_framework import exceptions
@@ -115,12 +116,18 @@ class NovaPoshtaClient:
             "json": data,
             "timeout": self.timeout,
         }
+
         with self.http_client() as _client:
-            pprint(request)
             response = _client.post(**request).json()
         if response["success"]:
             return response
-        raise exceptions.NotFound({"detail": response["errors"]})
+        if "To many requests" in response["errors"]:
+            time.sleep(0.5)
+            with self.http_client() as _client:
+                response = _client.post(**request).json()
+            if response["success"]:
+                return response
+        raise exceptions.NotFound({"detail": response["errors"]+response.get("info")})
 
     def get_areas(self) -> dict:
         """
